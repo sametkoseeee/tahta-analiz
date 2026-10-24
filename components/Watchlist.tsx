@@ -1,0 +1,130 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { fetchNews } from "@/lib/news";
+import { markRead, notificationsEnabled, notificationsSupported, setNotificationsEnabled } from "@/lib/notify";
+import type { CompanySummary } from "@/lib/types";
+import { useWatchlist } from "@/lib/watchlist";
+import CompaniesTable from "./CompaniesTable";
+import NewsList from "./NewsList";
+
+function NotificationToggle() {
+  const [on, setOn] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const [denied, setDenied] = useState(false);
+
+  useEffect(() => {
+    setSupported(notificationsSupported());
+    setOn(notificationsEnabled());
+    setDenied(notificationsSupported() && Notification.permission === "denied");
+  }, []);
+
+  if (!supported) return <p className="text-xs text-muted">Bu tarayıcı bildirimleri desteklemiyor.</p>;
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <button
+        onClick={async () => {
+          const result = await setNotificationsEnabled(!on);
+          setOn(result);
+          setDenied(Notification.permission === "denied");
+        }}
+        role="switch"
+        aria-checked={on}
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${on ? "bg-accent" : "bg-border"}`}
+      >
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
+      </button>
+      <div className="text-sm">
+        <div className="font-medium">Tarayıcı bildirimleri {on ? "açık" : "kapalı"}</div>
+        <div className="text-xs text-muted">
+          {denied
+            ? "Bildirim izni tarayıcıda engellenmiş; adres çubuğundaki site ayarlarından izin verebilirsin."
+            : "İzlediğin şirketler KAP'ta bildirim yayınladığında uyarı alırsın. Site bir sekmede açık olmalı."}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Watchlist({ companies }: { companies: CompanySummary[] }) {
+  const { list, remove } = useWatchlist();
+  const watched = useMemo(() => companies.filter((c) => list.includes(c.code)), [companies, list]);
+  const [days, setDays] = useState(7);
+
+  // Sayfa açılınca izlenen şirketlerin bildirimleri okundu sayılır (zildeki sayaç sıfırlanır)
+  const key = list.join(",");
+  useEffect(() => {
+    if (!key) return;
+    fetchNews(key.split(","), 2)
+      .then((items) => markRead(items.map((d) => d.id)))
+      .catch(() => {});
+  }, [key]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">İzleme Listesi</h1>
+          <p className="mt-1 text-sm text-muted">
+            {list.length > 0
+              ? `${list.length} şirket izleniyor. Liste bu tarayıcıda saklanır.`
+              : "Henüz şirket eklemedin. Şirket sayfalarındaki ya da tablolardaki ☆ işaretiyle ekleyebilirsin."}
+          </p>
+        </div>
+        <div className="card p-3">
+          <NotificationToggle />
+        </div>
+      </div>
+
+      {watched.length > 0 && (
+        <>
+          <section>
+            <CompaniesTable
+              companies={watched}
+              columns={["price", "change", "change1y", "marketCap", "pe", "pb", "roe", "netMargin"]}
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {watched.map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => remove(c.code)}
+                  className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted hover:border-down hover:text-down"
+                >
+                  {c.code} ✕
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="flex items-center justify-between border-b border-border p-3">
+              <h2 className="font-semibold">KAP Bildirimleri</h2>
+              <select
+                value={days}
+                onChange={(e) => setDays(Number(e.target.value))}
+                className="rounded-md border border-border bg-surface-2 px-2 py-1 text-xs"
+                aria-label="Dönem"
+              >
+                <option value={1}>Bugün</option>
+                <option value={7}>Son 7 gün</option>
+                <option value={30}>Son 30 gün</option>
+              </select>
+            </div>
+            <NewsList codes={list} days={days} empty="Bu dönemde izlediğin şirketlerden bildirim yok." />
+          </section>
+        </>
+      )}
+
+      {list.length === 0 && (
+        <div className="card p-8 text-center text-sm text-muted">
+          <Link href="/" className="text-accent hover:underline">
+            Hisselere göz at
+          </Link>{" "}
+          ve takip etmek istediklerini ☆ ile işaretle.
+        </div>
+      )}
+    </div>
+  );
+}
