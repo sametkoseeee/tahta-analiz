@@ -25,6 +25,16 @@ create table if not exists public.sent_disclosures (
   sent_at timestamptz not null default now()
 );
 
+-- Seans içi güncel fiyatlar (scripts/update_prices.py 15 dakikada bir yazar)
+create table if not exists public.prices (
+  code text primary key,
+  price numeric not null,
+  prev_close numeric,
+  change numeric,
+  volume bigint,
+  updated_at timestamptz not null default now()
+);
+
 -- Satır düzeyi güvenlik: herkes yalnızca kendi kayıtlarını görür/değiştirir
 alter table public.watchlist enable row level security;
 alter table public.push_subscriptions enable row level security;
@@ -33,6 +43,11 @@ alter table public.sent_disclosures enable row level security; -- yalnızca serv
 drop policy if exists "kendi izleme listesi" on public.watchlist;
 create policy "kendi izleme listesi" on public.watchlist
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Fiyatlar herkese açık okunur, yalnızca service role yazar
+alter table public.prices enable row level security;
+drop policy if exists "fiyatlar herkese açık" on public.prices;
+create policy "fiyatlar herkese açık" on public.prices for select using (true);
 
 drop policy if exists "kendi abonelikleri" on public.push_subscriptions;
 create policy "kendi abonelikleri" on public.push_subscriptions

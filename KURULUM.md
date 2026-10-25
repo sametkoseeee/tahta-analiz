@@ -12,7 +12,9 @@ Bitince:
 ## 1. GitHub — kodu yükle
 
 1. <https://github.com> üzerinden hesap aç (varsa giriş yap).
-2. Sağ üstte **+ → New repository**: ad `hisse-analiz`, **Private** seç, başka hiçbir kutuyu işaretleme → **Create repository**.
+2. Sağ üstte **+ → New repository**: ad `hisse-analiz`, **Public** seç, başka hiçbir kutuyu işaretleme → **Create repository**.
+
+   > Neden Public? Otomatik işler (15 dakikada bir fiyat, 10 dakikada bir KAP kontrolü, günlük yayın) ayda ~7.000 dakika GitHub Actions süresi kullanır. Private repolarda ücretsiz kota 2.000 dakika, Public repolarda sınırsızdır. Anahtarlar kodda değil GitHub Secrets'ta durduğu için kodun açık olması güvenlik sorunu değildir. Private istersen GitHub'ın ücretli planı gerekir ya da fiyat/KAP sıklıkları düşürülmelidir.
 3. Bilgisayarında proje klasöründe şunları çalıştır (`KULLANICI_ADIN` yerine GitHub kullanıcı adını yaz):
 
    ```bash
@@ -71,6 +73,7 @@ GitHub'da repo → **Settings → Secrets and variables → Actions → New repo
 2. **Veri güncelle ve yayınla → Run workflow**. Tüm hisseleri çektiği için ilk sefer 20–40 dakika sürebilir.
 3. Yeşil tik gelince site yayında. 2. adımdaki Supabase **URL Configuration** ayarını yapmayı unutma.
 4. **KAP bildirimleri** iş akışı kendiliğinden 10 dakikada bir çalışır. İlk çalışmada mevcut bildirimleri "gönderildi" sayar; sonrakilerde yalnızca yeni bildirimleri gönderir.
+5. **Seans içi fiyatlar** iş akışı hafta içi 10:00–18:45 arası 15 dakikada bir çalışır ve fiyatları Supabase'e yazar; site açıkken fiyatlar ve fiyata bağlı oranlar (piyasa değeri, F/K, PD/DD…) kendiliğinden güncellenir. Hemen denemek için **Actions → Seans içi fiyatlar → Run workflow**.
 
 ## 6. Dene
 

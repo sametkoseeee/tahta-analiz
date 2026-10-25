@@ -19,7 +19,7 @@ BIST şirketlerinin mali tablolarını, oranlarını ve fiyat geçmişini göste
 `scripts/fetch_data.py` veriyi çekip `data/` klasörüne JSON yazar; site build sırasında bu dosyaları okur.
 
 - **Mali tablolar:** İş Yatırım'ın mali tablo servisinden (`scripts/isyatirim.py`), 2016'dan bugüne çeyreklik ve yıllık, TL cinsinden. Sanayi, banka ve sigorta şirketleri için ayrı kalem şablonları var. Kümülatif gelir tablosu/nakit akışı tek çeyreğe çevrilir; FAVÖK = net faaliyet kârı + amortisman. Veri gelmezse Yahoo'ya (son 5–6 çeyrek) düşülür.
-- **Fiyatlar ve şirket bilgileri:** Yahoo Finance (yfinance).
+- **Fiyatlar ve şirket bilgileri:** Yahoo Finance (yfinance). Seans içinde `scripts/update_prices.py` 15 dakikada bir tüm fiyatları tek toplu istekle çekip Supabase `prices` tablosuna yazar; site `/api/fiyatlar` üzerinden okuyup fiyata bağlı oranları tarayıcıda yeniden hesaplar (yeniden build gerekmez).
 
 ```bash
 pip install yfinance pandas

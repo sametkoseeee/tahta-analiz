@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { KeyStats, LivePrice, RatioGroups } from "@/components/CompanyLive";
 import FinancialCharts from "@/components/FinancialCharts";
 import NewsList from "@/components/NewsList";
-import WatchButton from "@/components/WatchButton";
 import PriceChart from "@/components/PriceChart";
 import Statements from "@/components/Statements";
+import WatchButton from "@/components/WatchButton";
 import { getCompany, getIndex } from "@/lib/data";
+import { num } from "@/lib/format";
 import { INDEX_NAMES } from "@/lib/indices";
-import { changeClass, compact, num, signedPct } from "@/lib/format";
-import { formatMetric, METRIC_MAP } from "@/lib/metrics";
-import type { MetricKey } from "@/lib/types";
 
 type Props = { params: Promise<{ kod: string }> };
 
@@ -23,23 +22,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: c ? `${c.code} · ${c.name}` : "Bulunamadı" };
 }
 
-const GROUPS: { title: string; keys: MetricKey[] }[] = [
-  { title: "Değerleme", keys: ["pe", "pb", "evEbitda", "ps", "dividendYield", "fcfYield"] },
-  { title: "Kârlılık", keys: ["roe", "roa", "grossMargin", "ebitdaMargin", "operatingMargin", "netMargin"] },
-  { title: "Büyüme", keys: ["revenueGrowth", "netIncomeGrowth", "change1y"] },
-  { title: "Borçluluk ve Likidite", keys: ["debtToEquity", "netDebtEbitda", "currentRatio", "netDebt"] },
-];
-
 export default async function CompanyPage({ params }: Props) {
   const { kod } = await params;
   const c = getCompany(kod);
   if (!c) notFound();
   const m = c.metrics;
   const fin = { code: c.code, financialCurrency: c.financialCurrency, statements: c.statements };
-
-  const range = m.high52 != null && m.low52 != null && m.price != null && m.high52 > m.low52
-    ? ((m.price - m.low52) / (m.high52 - m.low52)) * 100
-    : null;
 
   return (
     <div className="space-y-6">
@@ -61,60 +49,17 @@ export default async function CompanyPage({ params }: Props) {
           )}
           <p className="mt-1 text-muted">{c.name}</p>
         </div>
-        <div className="text-right tabular">
-          <div className="text-3xl font-semibold">{num(m.price)} ₺</div>
-          <div className={`text-sm font-medium ${changeClass(m.change)}`}>{signedPct(m.change)} bugün</div>
-        </div>
+        <LivePrice code={c.code} metrics={m} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="card p-4 lg:col-span-2">
-          <PriceChart prices={c.prices} />
+          <PriceChart code={c.code} prices={c.prices} />
         </div>
-        <div className="card divide-y divide-border text-sm tabular">
-          {[
-            ["Piyasa Değeri", `${compact(m.marketCap)} ₺`],
-            ["Firma Değeri", `${compact(m.ev)} ₺`],
-            ["F/K", formatMetric("pe", m.pe)],
-            ["PD/DD", formatMetric("pb", m.pb)],
-            ["FD/FAVÖK", formatMetric("evEbitda", m.evEbitda)],
-            ["Net Kâr (12 ay)", `${compact(m.netIncomeTtm)} ₺`],
-            ["Özkaynaklar", `${compact(m.equity)} ₺`],
-          ].map(([k, v]) => (
-            <div key={k} className="flex justify-between px-4 py-2.5">
-              <span className="text-muted">{k}</span>
-              <span className="font-medium">{v}</span>
-            </div>
-          ))}
-          <div className="px-4 py-3">
-            <div className="mb-1.5 flex justify-between text-xs text-muted">
-              <span>52 hafta düşük: {num(m.low52)}</span>
-              <span>yüksek: {num(m.high52)}</span>
-            </div>
-            <div className="relative h-1.5 rounded-full bg-surface-2">
-              {range != null && (
-                <div className="absolute -top-1 h-3.5 w-1 rounded bg-accent" style={{ left: `calc(${range}% - 2px)` }} />
-              )}
-            </div>
-          </div>
-        </div>
+        <KeyStats code={c.code} metrics={m} />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {GROUPS.map((g) => (
-          <div key={g.title} className="card p-4">
-            <h3 className="mb-3 text-sm font-semibold">{g.title}</h3>
-            <dl className="space-y-2 text-sm tabular">
-              {g.keys.map((k) => (
-                <div key={k} className="flex justify-between gap-2" title={METRIC_MAP[k].hint}>
-                  <dt className="text-muted">{METRIC_MAP[k].label}</dt>
-                  <dd className={`font-medium ${METRIC_MAP[k].kind === "change" ? changeClass(m[k]) : ""}`}>{formatMetric(k, m[k])}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        ))}
-      </section>
+      <RatioGroups code={c.code} metrics={m} />
 
       <FinancialCharts company={fin} />
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { downloadXlsx } from "@/lib/excel";
 import { filterByIndex, INDEX_NAMES, type IndexFilter } from "@/lib/indices";
+import { useLiveCompanies } from "@/lib/live";
 import { inputScale, inputUnit, METRIC_MAP, METRICS } from "@/lib/metrics";
 import type { CompanySummary, MetricKey } from "@/lib/types";
 import CompaniesTable, { sortCompanies, type SortState } from "./CompaniesTable";
@@ -37,7 +38,9 @@ export default function Radar({ companies }: { companies: CompanySummary[] }) {
   const [index, setIndex] = useState<IndexFilter>("all");
   const [sort, setSort] = useState<SortState>({ key: "marketCap", dir: -1 });
 
-  const pool = useMemo(() => filterByIndex(companies, index), [companies, index]);
+  // Filtreler güncel fiyatla yeniden hesaplanan oranlar üzerinde çalışır
+  const live = useLiveCompanies(companies);
+  const pool = useMemo(() => filterByIndex(live, index), [live, index]);
 
   const result = useMemo(() => {
     return pool.filter((c) => {

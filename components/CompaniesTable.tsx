@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { changeClass } from "@/lib/format";
+import { useLiveCompanies } from "@/lib/live";
 import { formatMetric, METRIC_MAP } from "@/lib/metrics";
 import type { CompanySummary, MetricKey } from "@/lib/types";
 import Sparkline from "./Sparkline";
@@ -51,7 +52,9 @@ export default function CompaniesTable({
     setPage(0);
     onSortChange?.(next);
   };
-  const sorted = useMemo(() => sortCompanies(companies, sort), [companies, sort]);
+  // Seans içi güncel fiyatlar (varsa) sıralamadan önce uygulanır
+  const live = useLiveCompanies(companies);
+  const sorted = useMemo(() => sortCompanies(live, sort), [live, sort]);
   const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
   const page = Math.min(paging.page, pageCount - 1);
   const rows = sorted.slice(page * pageSize, (page + 1) * pageSize);

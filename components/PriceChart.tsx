@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { changeClass, num, signedPct } from "@/lib/format";
+import { useLive } from "@/lib/live";
 import type { PricePoint } from "@/lib/types";
 
 const RANGES = [
@@ -17,9 +18,18 @@ const RANGES = [
 const monthFmt = new Intl.DateTimeFormat("tr-TR", { month: "short", year: "2-digit" });
 const dayFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric" });
 
-export default function PriceChart({ prices }: { prices: PricePoint[] }) {
+export default function PriceChart({ code, prices: base }: { code: string; prices: PricePoint[] }) {
   const [range, setRange] = useState("1Y");
   const days = RANGES.find((r) => r.label === range)!.days;
+  const q = useLive().quotes[code];
+  // Seans içi güncel fiyat: bugünün noktasını ekle ya da güncelle
+  const prices = useMemo(() => {
+    if (!q || base.length === 0) return base;
+    const today = new Date(q.t).toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
+    const last = base[base.length - 1];
+    if (last.d === today) return [...base.slice(0, -1), { ...last, c: q.p }];
+    return last.d < today ? [...base, { d: today, c: q.p, v: 0 }] : base;
+  }, [base, q]);
   const data = useMemo(() => (days === Infinity ? prices : prices.slice(-days)), [prices, days]);
 
   if (data.length < 2) return <div className="p-6 text-sm text-muted">Fiyat verisi yok.</div>;
