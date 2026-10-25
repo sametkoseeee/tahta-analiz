@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { KeyStats, LivePrice, RatioGroups } from "@/components/CompanyLive";
-import CapitalTable from "@/components/CapitalTable";
 import FinancialCharts from "@/components/FinancialCharts";
 import NewsList from "@/components/NewsList";
 import PriceChart from "@/components/PriceChart";
 import Statements from "@/components/Statements";
 import WatchButton from "@/components/WatchButton";
-import { getCapitalActions, getCompany, getIndex } from "@/lib/data";
+import { getCompany, getIndex } from "@/lib/data";
 import { num } from "@/lib/format";
 import { INDEX_NAMES } from "@/lib/indices";
 
@@ -29,8 +28,6 @@ export default async function CompanyPage({ params }: Props) {
   if (!c) notFound();
   const m = c.metrics;
   const fin = { code: c.code, financialCurrency: c.financialCurrency, statements: c.statements };
-  const capital = getCapitalActions().rows.filter((r) => r.code === c.code);
-
   return (
     <div className="space-y-6">
       <section className="flex flex-wrap items-end justify-between gap-4">
@@ -74,13 +71,6 @@ export default async function CompanyPage({ params }: Props) {
         </div>
         <NewsList codes={[c.code]} days={30} showCompany={false} empty="Son 30 günde KAP bildirimi yok." />
       </section>
-
-      {capital.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="font-semibold">Sermaye Artırımları</h2>
-          <CapitalTable rows={capital} initialCode={c.code} />
-        </section>
-      )}
 
       {c.summary && (
         <section className="card p-4">

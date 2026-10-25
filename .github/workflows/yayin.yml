@@ -34,16 +34,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install yfinance pandas requests beautifulsoup4
+      - run: pip install yfinance pandas requests
       - name: Veriyi çek
         # Kod gönderiminde, önbellekte veri varsa yeniden çekme (hızlı yayın)
         if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
         run: python -u scripts/fetch_data.py --refresh-list
-      - name: Sermaye artırımlarını güncelle
-        # KAP engellerse yayın durmasın; eksik kalan günler bir sonraki çalıştırmada taranır
-        continue-on-error: true
-        timeout-minutes: 50
-        run: python -u scripts/sermaye_artirim.py
 
       - uses: actions/setup-node@v4
         with:
