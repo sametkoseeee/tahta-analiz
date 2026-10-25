@@ -13,7 +13,7 @@ import "./globals.css";
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
-  title: { default: "Hisse Analiz", template: "%s | Hisse Analiz" },
+  title: { default: "Tahta Analiz", template: "%s | Tahta Analiz" },
   description: "BIST şirketlerinin mali tabloları, oranları, KAP bildirimleri ve hisse tarama aracı",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100"),
   icons: { icon: "/icon.png", apple: "/icon.png" },
@@ -31,8 +31,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             {/* Telefonda iki satır: üstte logo + hesap, altta menü + arama; masaüstünde tek satır */}
             <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 md:h-14 md:flex-nowrap md:py-0">
               <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap font-semibold tracking-tight">
-                <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-white">H</span>
-                <span>Hisse Analiz</span>
+                <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-white">T</span>
+                <span>Tahta Analiz</span>
               </Link>
               <div className="ml-auto flex shrink-0 items-center gap-2 md:order-last md:ml-0">
                 <NewsBell />

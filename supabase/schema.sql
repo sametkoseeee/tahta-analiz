@@ -1,4 +1,4 @@
--- Hisse Analiz veritabanı şeması. Supabase > SQL Editor'de bir kez çalıştır.
+-- Tahta Analiz veritabanı şeması. Supabase > SQL Editor'de bir kez çalıştır.
 
 -- Kullanıcının izleme listesi
 create table if not exists public.watchlist (

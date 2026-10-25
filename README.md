@@ -1,4 +1,4 @@
-# Hisse Analiz
+# Tahta Analiz
 
 BIST şirketlerinin mali tablolarını, oranlarını ve fiyat geçmişini gösteren, Fintables benzeri bir site.
 

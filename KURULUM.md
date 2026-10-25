@@ -1,4 +1,4 @@
-﻿# Yayına alma rehberi (GitHub + Supabase + Vercel)
+# Yayına alma rehberi (GitHub + Supabase + Vercel)
 
 Toplam ~30 dakika. Üç ücretsiz hesap gerekiyor. Anahtarları **kimseyle paylaşma**; yalnızca aşağıda söylenen yerlere yapıştır.
 
@@ -12,13 +12,13 @@ Bitince:
 ## 1. GitHub — kodu yükle
 
 1. <https://github.com> üzerinden hesap aç (varsa giriş yap).
-2. Sağ üstte **+ → New repository**: ad `hisse-analiz`, **Public** seç, başka hiçbir kutuyu işaretleme → **Create repository**.
+2. Sağ üstte **+ → New repository**: ad `tahta-analiz`, **Public** seç, başka hiçbir kutuyu işaretleme → **Create repository**.
 
    > Neden Public? Otomatik işler (15 dakikada bir fiyat, 10 dakikada bir KAP kontrolü, günlük yayın) ayda ~7.000 dakika GitHub Actions süresi kullanır. Private repolarda ücretsiz kota 2.000 dakika, Public repolarda sınırsızdır. Anahtarlar kodda değil GitHub Secrets'ta durduğu için kodun açık olması güvenlik sorunu değildir. Private istersen GitHub'ın ücretli planı gerekir ya da fiyat/KAP sıklıkları düşürülmelidir.
 3. Bilgisayarında proje klasöründe şunları çalıştır (`KULLANICI_ADIN` yerine GitHub kullanıcı adını yaz):
 
    ```bash
-   git remote add origin https://github.com/KULLANICI_ADIN/hisse-analiz.git
+   git remote add origin https://github.com/KULLANICI_ADIN/tahta-analiz.git
    git push -u origin master
    ```
 
@@ -27,7 +27,7 @@ Bitince:
 ## 2. Supabase — üyelik ve veritabanı
 
 1. <https://supabase.com> → **Start your project** (GitHub hesabınla girebilirsin).
-2. **New project**: ad `hisse-analiz`, güçlü bir veritabanı şifresi belirle (bir yere not et), bölge **Central EU (Frankfurt)** → **Create**.
+2. **New project**: ad `tahta-analiz`, güçlü bir veritabanı şifresi belirle (bir yere not et), bölge **Central EU (Frankfurt)** → **Create**.
 3. Proje hazır olunca soldan **SQL Editor → New query**: bu repodaki `supabase/schema.sql` dosyasının tamamını yapıştır → **Run**. "Success" görmelisin.
 4. Soldan **Project Settings → API**. Şu üç değeri not et:
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
@@ -40,7 +40,7 @@ Bitince:
 ## 3. Vercel — site barındırma
 
 1. <https://vercel.com> → **Sign up → Continue with GitHub**.
-2. **Add New… → Project** → `hisse-analiz` reposunu **Import** et (proje adı `hisse-analiz` kalırsa adres `hisse-analiz.vercel.app` olur). Framework otomatik "Next.js" seçilir.
+2. **Add New… → Project** → `tahta-analiz` reposunu **Import** et (proje adı `tahta-analiz` kalırsa adres `tahta-analiz.vercel.app` olur). Framework otomatik "Next.js" seçilir.
 3. **Environment Variables** bölümüne şunları ekle (değerler: Supabase'ten aldıkların ve bilgisayarındaki `.env.local` dosyasındaki VAPID satırları):
 
    | Ad | Değer |
@@ -83,14 +83,14 @@ GitHub'da repo → **Settings → Secrets and variables → Actions → New repo
 
 ## 7. Kendi alan adın (isteğe bağlı)
 
-`hisseanaliz.com` ve `hisseanaliz.com.tr` başkalarına kayıtlı (Ekim 2026). Boş olanlar arasında `hisse-analiz.com` ve `hisseanaliz.io` vardı; satın almadan önce tekrar kontrol et.
+Seçilen alan adı: `tahtaanaliz.com` (Ekim 2026'da `.com` ve `.com.tr` boştu; adı korumak için ikisini birlikte almak iyi olur).
 
 1. Alan adını bir kayıt firmasından (ör. Cloudflare, Namecheap, İsimtescil) satın al.
-2. Vercel'de proje → **Settings → Domains → Add**: `hisse-analiz.com` yaz, `www` yönlendirmesini de eklemeyi kabul et.
+2. Vercel'de proje → **Settings → Domains → Add**: `tahtaanaliz.com` yaz, `www` yönlendirmesini de eklemeyi kabul et.
 3. Vercel'in gösterdiği DNS kayıtlarını alan adı firmasının panelinde ekle (genelde kök alan adı için `A 76.76.21.21`, `www` için `CNAME cname.vercel-dns.com`). Birkaç dakika–birkaç saat içinde aktif olur; HTTPS sertifikası otomatik gelir.
 4. Adresi değiştirdikten sonra şunları yeni adresle güncelle:
-   - Vercel ve GitHub Secrets'taki `NEXT_PUBLIC_SITE_URL` → `https://hisse-analiz.com`
-   - Supabase **Authentication → URL Configuration**: Site URL ve Redirect URL (`https://hisse-analiz.com/auth/callback`)
+   - Vercel ve GitHub Secrets'taki `NEXT_PUBLIC_SITE_URL` → `https://tahtaanaliz.com`
+   - Supabase **Authentication → URL Configuration**: Site URL ve Redirect URL (`https://tahtaanaliz.com/auth/callback`)
    - Sonra GitHub Actions'ta **Veri güncelle ve yayınla**'yı bir kez elle çalıştır.
 
 ## Yerelde üyelikle çalıştırmak

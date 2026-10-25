@@ -1,11 +1,11 @@
-// Hisse Analiz service worker: site kapalıyken gelen KAP bildirimlerini gösterir.
+// Tahta Analiz service worker: site kapalıyken gelen KAP bildirimlerini gösterir.
 
 self.addEventListener("push", (event) => {
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { title: "Hisse Analiz", body: event.data ? event.data.text() : "" };
+    data = { title: "Tahta Analiz", body: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
     self.registration.showNotification(data.title || "KAP bildirimi", {
