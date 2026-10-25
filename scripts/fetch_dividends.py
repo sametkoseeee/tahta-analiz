@@ -33,6 +33,8 @@ KAP_LIMIT = 2000
 PAUSE = 4.0
 DAYS = 400
 WINDOW = 10
+# Bir çalıştırmada açılacak en fazla yeni bildirim: yayın uzamasın; kalanlar sonraki günlerde
+MAX_NEW = 120
 
 
 def get(method: str, url: str, **kw) -> requests.Response:
@@ -174,8 +176,12 @@ def main() -> None:
         for code in [c.strip() for c in (r.get("stockCodes") or "").split(",") if c.strip() in tickers]:
             if code not in latest or r["disclosureIndex"] > latest[code]["disclosureIndex"]:
                 latest[code] = r
-    todo = [r for r in latest.values() if str(r["disclosureIndex"]) not in cache]
-    print(f"  {len(found)} bildirim, {len(latest)} şirket, {len(todo)} yeni ayrıntı", flush=True)
+    # En yeni bildirimler önce (yaklaşan ödemeler genelde bunlar)
+    todo = sorted((r for r in latest.values() if str(r["disclosureIndex"]) not in cache),
+                  key=lambda r: r["disclosureIndex"], reverse=True)
+    print(f"  {len(found)} bildirim, {len(latest)} şirket, {len(todo)} yeni ayrıntı"
+          + (f" (bu çalıştırmada {MAX_NEW})" if len(todo) > MAX_NEW else ""), flush=True)
+    todo = todo[:MAX_NEW]
 
     for i, r in enumerate(todo, 1):
         code = next(c.strip() for c in r["stockCodes"].split(",") if c.strip() in tickers)

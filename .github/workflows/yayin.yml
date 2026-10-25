@@ -51,9 +51,9 @@ jobs:
         timeout-minutes: 30
         run: python -u scripts/fetch_reports.py
       - name: Temettü takvimini çek (KAP)
-        # İlk çalıştırmada tüm şirketlerin son bildirimi açılır (uzun); sonra yalnızca yeniler
+        # Her çalıştırmada en fazla 120 yeni bildirim açılır (~10 dk); eksikler sonraki günlerde tamamlanır
         continue-on-error: true
-        timeout-minutes: 75
+        timeout-minutes: 20
         run: python -u scripts/fetch_dividends.py
 
       # Sonraki adımlar (Vercel) hata verse de çekilen veri saklansın; uzun ilk çekim boşa gitmesin
