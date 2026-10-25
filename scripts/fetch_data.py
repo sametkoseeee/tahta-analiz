@@ -20,6 +20,8 @@ import pandas as pd
 import yfinance as yf
 from yfinance import EquityQuery
 
+from isyatirim import fetch_statements as isy_statements
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 COMPANIES_DIR = DATA / "companies"
@@ -321,6 +323,17 @@ def fx_to_try(currency: str):
     return _fx_cache[currency]
 
 
+def previous_group(code: str):
+    """Önceki çalıştırmada bulunan İş Yatırım şablonu (gereksiz denemeyi önler)"""
+    path = COMPANIES_DIR / f"{code}.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("statementGroup")
+    except (OSError, ValueError):
+        return None
+
+
 def fetch(code: str):
     t = yf.Ticker(f"{code}.IS")
     info = t.info or {}
@@ -335,18 +348,34 @@ def fetch(code: str):
             if c is not None:
                 prices.append({"d": idx.strftime("%Y-%m-%d"), "c": round(c, 4), "v": int(clean(r["Volume"]) or 0)})
 
-    q_bal = statement(t.quarterly_balance_sheet, BALANCE_ROWS, 8)
-    q_inc = statement(t.quarterly_income_stmt, INCOME_ROWS, 8)
-    q_cf = statement(t.quarterly_cashflow, CASHFLOW_ROWS, 8)
-    a_bal = statement(t.balance_sheet, BALANCE_ROWS, 5)
-    a_inc = statement(t.income_stmt, INCOME_ROWS, 5)
-    a_cf = statement(t.cashflow, CASHFLOW_ROWS, 5)
+    # Mali tablolar: önce İş Yatırım (2016'dan bugüne, TL), olmazsa Yahoo (son 5–6 çeyrek)
+    try:
+        isy, group = isy_statements(code, previous_group(code))
+    except Exception as e:  # noqa: BLE001
+        print(f"{code}: İş Yatırım alınamadı, Yahoo kullanılıyor ({e})")
+        isy, group = None, None
+    if isy:
+        source, fin_currency, fx = "isyatirim", "TRY", 1.0
+        q_bal, q_inc, q_cf = (isy["quarterly"][k] for k in ("balance", "income", "cashflow"))
+        a_bal, a_inc, a_cf = (isy["annual"][k] for k in ("balance", "income", "cashflow"))
+    else:
+        source = "yahoo"
+        q_bal = statement(t.quarterly_balance_sheet, BALANCE_ROWS, 8)
+        q_inc = statement(t.quarterly_income_stmt, INCOME_ROWS, 8)
+        q_cf = statement(t.quarterly_cashflow, CASHFLOW_ROWS, 8)
+        a_bal = statement(t.balance_sheet, BALANCE_ROWS, 5)
+        a_inc = statement(t.income_stmt, INCOME_ROWS, 5)
+        a_cf = statement(t.cashflow, CASHFLOW_ROWS, 5)
 
     price = prices[-1]["c"] if prices else clean(info.get("currentPrice"))
     prev = prices[-2]["c"] if len(prices) > 1 else None
     year = [p["c"] for p in prices[-252:]]
 
-    shares = last(row(q_bal, "Hisse Adedi") or row(a_bal, "Hisse Adedi")) or clean(info.get("sharesOutstanding"))
+    # Türkiye'de pay başına nominal değer 1 TL olduğundan ödenmiş sermaye = hisse adedi
+    shares = (
+        last(row(q_bal, "Ödenmiş Sermaye") or row(q_bal, "Hisse Adedi") or row(a_bal, "Hisse Adedi"))
+        or clean(info.get("sharesOutstanding"))
+    )
     mcap = price * shares if price and shares else clean(info.get("marketCap"))
 
     # Çeyreklik veri yetersizse yıllığa düş; sonuç TL'ye çevrilir
@@ -421,6 +450,8 @@ def fetch(code: str):
         "employees": info.get("fullTimeEmployees"),
         "city": info.get("city"),
         "financialCurrency": fin_currency,
+        "statementSource": source,
+        "statementGroup": group,
         "metrics": metrics,
         "prices": prices,
         "statements": {

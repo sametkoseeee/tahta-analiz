@@ -10,19 +10,26 @@ const get = (s: Statement, label: string) => s.rows.find((r) => r.label === labe
 const tooltipStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 };
 const axisTick = { fontSize: 11, fill: "var(--muted)" };
 
+/** Bankalarda hasılat yerine net faiz geliri, sigortacılarda teknik gelirler gösterilir */
+const TOP_LINES = ["Hasılat", "Net Faiz Geliri", "Teknik Gelirler"];
+const QUARTERS_SHOWN = 12;
+
 export default function FinancialCharts({ company }: { company: Financials }) {
   const [mode, setMode] = useState<"quarterly" | "annual">("quarterly");
   const inc = company.statements[mode].income;
   const annual = mode === "annual";
-  const rev = get(inc, "Hasılat");
+  const topLabel = TOP_LINES.find((l) => get(inc, l)) ?? "Hasılat";
+  const rev = get(inc, topLabel);
+  // Marjlar yalnızca gerçek hasılat için anlamlı
+  const margins = topLabel === "Hasılat";
   const gross = get(inc, "Brüt Kâr");
   const ebitda = get(inc, "FAVÖK");
   const net = get(inc, "Ana Ortaklık Net Kârı");
   const cur = company.financialCurrency;
 
-  const data = inc.periods.map((p, i) => {
+  const all = inc.periods.map((p, i) => {
     const r = rev?.[i] ?? null;
-    const ratio = (v: number | null | undefined) => (r && v != null ? (v / r) * 100 : null);
+    const ratio = (v: number | null | undefined) => (margins && r && r > 0 && v != null ? (v / r) * 100 : null);
     return {
       p: periodLabel(p, annual),
       hasilat: r,
@@ -32,6 +39,7 @@ export default function FinancialCharts({ company }: { company: Financials }) {
       net: ratio(net?.[i]),
     };
   });
+  const data = annual ? all : all.slice(-QUARTERS_SHOWN);
 
   if (data.length === 0) return null;
   const hasRevenue = data.some((d) => d.hasilat != null);
@@ -54,7 +62,9 @@ export default function FinancialCharts({ company }: { company: Financials }) {
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
-          <h3 className="mb-2 text-sm text-muted">Hasılat ve net kâr ({cur})</h3>
+          <h3 className="mb-2 text-sm text-muted">
+            {topLabel} ve net kâr ({cur}{annual ? "" : `, son ${data.length} çeyrek`})
+          </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
@@ -63,13 +73,13 @@ export default function FinancialCharts({ company }: { company: Financials }) {
                 <YAxis tickFormatter={(v: number) => compact(v)} width={60} tick={axisTick} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v) => compact(Number(v))} cursor={{ fill: "var(--surface-2)" }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                {hasRevenue && <Bar dataKey="hasilat" name="Hasılat" fill="var(--accent)" radius={[3, 3, 0, 0]} />}
+                {hasRevenue && <Bar dataKey="hasilat" name={topLabel} fill="var(--accent)" radius={[3, 3, 0, 0]} />}
                 <Bar dataKey="netKar" name="Net Kâr" fill="var(--up)" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        {hasRevenue && (
+        {hasRevenue && margins && (
           <div>
             <h3 className="mb-2 text-sm text-muted">Kâr marjları (%)</h3>
             <div className="h-64">

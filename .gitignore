@@ -44,3 +44,6 @@ next-env.d.ts
 # script ile üretilen veri (python scripts/fetch_data.py)
 /data/*
 !/data/tickers.json
+
+# python
+__pycache__/

@@ -16,7 +16,10 @@ BIST şirketlerinin mali tablolarını, oranlarını ve fiyat geçmişini göste
 
 ## Veri
 
-`scripts/fetch_data.py`, Yahoo Finance'ten (yfinance) veriyi çekip `data/` klasörüne JSON yazar. Site build sırasında bu dosyaları okur.
+`scripts/fetch_data.py` veriyi çekip `data/` klasörüne JSON yazar; site build sırasında bu dosyaları okur.
+
+- **Mali tablolar:** İş Yatırım'ın mali tablo servisinden (`scripts/isyatirim.py`), 2016'dan bugüne çeyreklik ve yıllık, TL cinsinden. Sanayi, banka ve sigorta şirketleri için ayrı kalem şablonları var. Kümülatif gelir tablosu/nakit akışı tek çeyreğe çevrilir; FAVÖK = net faaliyet kârı + amortisman. Veri gelmezse Yahoo'ya (son 5–6 çeyrek) düşülür.
+- **Fiyatlar ve şirket bilgileri:** Yahoo Finance (yfinance).
 
 ```bash
 pip install yfinance pandas
@@ -29,8 +32,8 @@ Notlar:
 - Hisse listesi Yahoo'nun tarayıcısından gelir (Borsa İstanbul'daki tüm paylar); son 30 günde işlem görmeyenler atlanır.
 - Endeks üyelikleri (BIST 30/50/100, Katılım, Temettü 25…) ve sektörler KAP'ın Endeksler sayfasından gelir; `python scripts/fetch_data.py --indices-only` yalnızca bunları günceller.
 - Oranlar son 12 ay (son 4 çeyrek toplamı) üzerinden hesaplanır; çeyreklik veri yoksa son yıllık veri kullanılır.
-- USD raporlayan şirketlerin (THYAO, PGSUS…) tutarları oran hesabında güncel kurla TL'ye çevrilir; tablolarda kendi para birimleriyle gösterilir.
-- Net borç = finansal borçlar − nakit (kiralama borçları dahil).
+- İş Yatırım USD raporlayan şirketlerin (THYAO, PGSUS…) tablolarını da TL verir; Yahoo'ya düşülen şirketlerde oranlar güncel kurla TL'ye çevrilir.
+- Net borç = finansal borçlar − nakit (kiralama borçları dahil). Hisse adedi = ödenmiş sermaye (nominal 1 TL).
 - Yahoo verisi kişisel kullanım içindir. Site ticari olarak yayına alınacaksa lisanslı bir veri kaynağı gerekir.
 
 ## Çalıştırma

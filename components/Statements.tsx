@@ -15,7 +15,26 @@ type TabKey = (typeof TABS)[number]["key"];
 
 /** Hisse başına kâr milyon cinsinden gösterilmez */
 const RAW_ROWS = new Set(["Hisse Başına Kâr"]);
-const BOLD_ROWS = new Set(["Toplam Varlıklar", "Toplam Özkaynaklar", "Brüt Kâr", "Esas Faaliyet Kârı", "Ana Ortaklık Net Kârı", "Serbest Nakit Akışı"]);
+const BOLD_ROWS = new Set([
+  "Toplam Varlıklar",
+  "Toplam Özkaynaklar",
+  "Hasılat",
+  "Brüt Kâr",
+  "FAVÖK",
+  "Esas Faaliyet Kârı",
+  "Net Faiz Geliri",
+  "Net Faaliyet Kârı",
+  "Teknik Bölüm Dengesi",
+  "Ana Ortaklık Net Kârı",
+  "Serbest Nakit Akışı",
+]);
+
+/** Çeyreklik tabloda gösterilecek dönem sayısı */
+const RANGES = [
+  { label: "Son 8", n: 8 },
+  { label: "Son 20", n: 20 },
+  { label: "Tümü", n: Infinity },
+];
 
 function toSheet(name: string, s: Statement, annual: boolean): Sheet {
   // Excel'de eskiden yeniye, ham değerlerle
@@ -37,10 +56,12 @@ export function exportCompany(company: Financials) {
 export default function Statements({ company }: { company: Financials }) {
   const [tab, setTab] = useState<TabKey>("balance");
   const [mode, setMode] = useState<"quarterly" | "annual">("quarterly");
+  const [range, setRange] = useState(8);
   const s = company.statements[mode][tab];
   const annual = mode === "annual";
-  // En yeni dönem solda
-  const order = s.periods.map((_, i) => i).reverse();
+  // En yeni dönem solda; çeyreklikte seçilen sayıda dönem
+  const shown = annual ? s.periods.length : Math.min(range, s.periods.length);
+  const order = s.periods.map((_, i) => i).slice(s.periods.length - shown).reverse();
 
   return (
     <section className="card">
@@ -56,7 +77,20 @@ export default function Statements({ company }: { company: Financials }) {
             </button>
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {!annual && s.periods.length > 8 && (
+            <div className="flex rounded-lg bg-surface-2 p-0.5 text-xs" aria-label="Dönem sayısı">
+              {RANGES.map((r) => (
+                <button
+                  key={r.label}
+                  onClick={() => setRange(r.n)}
+                  className={`rounded-md px-2.5 py-1 ${range === r.n ? "bg-surface font-semibold shadow-sm" : "text-muted"}`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex rounded-lg bg-surface-2 p-0.5 text-xs">
             {(["quarterly", "annual"] as const).map((m) => (
               <button
