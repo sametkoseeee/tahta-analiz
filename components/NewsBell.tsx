@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchNews, type Disclosure } from "@/lib/news";
 import { getNotified, getRead, markNotified, notificationsEnabled, READ_EVENT } from "@/lib/notify";
+import { pushActive } from "@/lib/push";
 import { useWatchlist } from "@/lib/watchlist";
 
 const POLL_MS = 2 * 60_000;
@@ -43,7 +44,8 @@ export default function NewsBell() {
       const incoming = fresh.filter((d) => !notified.has(d.id));
       if (incoming.length === 0) return;
       markNotified(incoming.map((d) => d.id));
-      if (!notificationsEnabled()) return;
+      // Web Push açıksa bildirimi sunucu gönderir; burada tekrar gösterme
+      if (!notificationsEnabled() || pushActive()) return;
       for (const d of incoming.slice(0, 5).reverse()) {
         const n = new Notification(`${d.codes.join(", ")} · KAP bildirimi`, {
           body: d.summary ? `${d.subject}\n${d.summary}` : d.subject,

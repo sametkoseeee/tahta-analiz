@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
+import AccountMenu from "@/components/AccountMenu";
 import NewsBell from "@/components/NewsBell";
 import Search from "@/components/Search";
+import WatchlistSync from "@/components/WatchlistSync";
 import { getIndex } from "@/lib/data";
 import "./globals.css";
 
@@ -43,6 +45,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <div className="ml-auto flex w-full max-w-xs items-center gap-2">
               <Search items={items} />
               <NewsBell />
+              <AccountMenu />
+              <WatchlistSync />
             </div>
           </div>
         </header>

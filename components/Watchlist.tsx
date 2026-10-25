@@ -2,14 +2,69 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useUser } from "@/lib/auth";
 import { fetchNews } from "@/lib/news";
 import { markRead, notificationsEnabled, notificationsSupported, setNotificationsEnabled } from "@/lib/notify";
+import { currentSubscription, disablePush, enablePush, pushActive, pushSupported } from "@/lib/push";
+import { supabaseEnabled } from "@/lib/supabase/config";
 import type { CompanySummary } from "@/lib/types";
 import { useWatchlist } from "@/lib/watchlist";
 import CompaniesTable from "./CompaniesTable";
 import NewsList from "./NewsList";
 
-function NotificationToggle() {
+function Switch({ on, busy, onClick }: { on: boolean; busy?: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={busy}
+      role="switch"
+      aria-checked={on}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${on ? "bg-accent" : "bg-border"}`}
+    >
+      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
+    </button>
+  );
+}
+
+/** Giriş yapılmışsa: Web Push (site kapalıyken de) */
+function PushToggle() {
+  const [on, setOn] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    currentSubscription().then((s) => setOn(Boolean(s) && pushActive()));
+  }, []);
+
+  const toggle = async () => {
+    setBusy(true);
+    setError(null);
+    if (on) {
+      await disablePush();
+      setOn(false);
+    } else {
+      const err = await enablePush();
+      setError(err);
+      setOn(!err);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Switch on={on} busy={busy} onClick={toggle} />
+      <div className="text-sm">
+        <div className="font-medium">Anlık bildirimler {on ? "açık" : "kapalı"}</div>
+        <div className={`text-xs ${error ? "text-down" : "text-muted"}`}>
+          {error ?? "İzlediğin şirketler KAP'ta bildirim yayınlayınca site kapalıyken de bu cihaza bildirim gelir."}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Giriş yapılmamışsa: yalnızca site açıkken çalışan sekme içi bildirimler */
+function TabNotificationToggle() {
   const [on, setOn] = useState(false);
   const [supported, setSupported] = useState(true);
   const [denied, setDenied] = useState(false);
@@ -24,18 +79,14 @@ function NotificationToggle() {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <button
+      <Switch
+        on={on}
         onClick={async () => {
           const result = await setNotificationsEnabled(!on);
           setOn(result);
           setDenied(Notification.permission === "denied");
         }}
-        role="switch"
-        aria-checked={on}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${on ? "bg-accent" : "bg-border"}`}
-      >
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
-      </button>
+      />
       <div className="text-sm">
         <div className="font-medium">Tarayıcı bildirimleri {on ? "açık" : "kapalı"}</div>
         <div className="text-xs text-muted">
@@ -43,9 +94,25 @@ function NotificationToggle() {
             ? "Bildirim izni tarayıcıda engellenmiş; adres çubuğundaki site ayarlarından izin verebilirsin."
             : "İzlediğin şirketler KAP'ta bildirim yayınladığında uyarı alırsın. Site bir sekmede açık olmalı."}
         </div>
+        {supabaseEnabled && (
+          <div className="mt-1 text-xs">
+            <Link href="/giris" className="text-accent hover:underline">
+              Giriş yaparsan
+            </Link>{" "}
+            bildirimler site kapalıyken de gelir.
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+function NotificationToggle() {
+  const user = useUser();
+  const [push, setPush] = useState(false);
+  useEffect(() => setPush(pushSupported()), []);
+  if (user === undefined) return null;
+  return user && push ? <PushToggle /> : <TabNotificationToggle />;
 }
 
 export default function Watchlist({ companies }: { companies: CompanySummary[] }) {
@@ -69,7 +136,7 @@ export default function Watchlist({ companies }: { companies: CompanySummary[] }
           <h1 className="text-2xl font-semibold tracking-tight">İzleme Listesi</h1>
           <p className="mt-1 text-sm text-muted">
             {list.length > 0
-              ? `${list.length} şirket izleniyor. Liste bu tarayıcıda saklanır.`
+              ? `${list.length} şirket izleniyor.`
               : "Henüz şirket eklemedin. Şirket sayfalarındaki ya da tablolardaki ☆ işaretiyle ekleyebilirsin."}
           </p>
         </div>

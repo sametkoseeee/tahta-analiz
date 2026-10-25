@@ -1,0 +1,50 @@
+name: Veri güncelle ve yayınla
+
+# Her iş günü akşamı (borsa kapanışından sonra) veriyi tazeler ve siteyi Vercel'e yayınlar.
+# Kod master'a gönderildiğinde de çalışır. data/ git'te olmadığı için Vercel kendi başına
+# build almaz (vercel.json); build burada alınıp hazır olarak yüklenir.
+on:
+  schedule:
+    - cron: "30 16 * * 1-5" # 19:30 TSİ
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: yayin
+  cancel-in-progress: true
+
+jobs:
+  yayinla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Önceki çalıştırmanın verisi: çekimde hata alan şirketler eski haliyle kalır
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: veri-${{ github.run_id }}
+          restore-keys: veri-
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yfinance pandas requests
+      - name: Veriyi çek
+        # Kod gönderiminde, önbellekte veri varsa yeniden çekme (hızlı yayın)
+        if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
+        run: python -u scripts/fetch_data.py --refresh-list
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx vercel@39.1.1 pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel@39.1.1 build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel@39.1.1 deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
