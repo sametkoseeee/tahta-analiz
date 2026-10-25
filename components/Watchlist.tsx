@@ -6,9 +6,11 @@ import { useUser } from "@/lib/auth";
 import { fetchNews } from "@/lib/news";
 import { markRead, notificationsEnabled, notificationsSupported, setNotificationsEnabled } from "@/lib/notify";
 import { currentSubscription, disablePush, enablePush, pushActive, pushSupported } from "@/lib/push";
-import type { CompanySummary } from "@/lib/types";
+import { stockCodes } from "@/lib/codes";
+import type { CompanySummary, FundSummary } from "@/lib/types";
 import { useWatchlist } from "@/lib/watchlist";
 import CompaniesTable from "./CompaniesTable";
+import FundsTable from "./FundsTable";
 import NewsList from "./NewsList";
 
 function Switch({ on, busy, onClick }: { on: boolean; busy?: boolean; onClick: () => void }) {
@@ -131,13 +133,30 @@ function NotificationToggle() {
   return user && push ? <PushToggle /> : <TabNotificationToggle />;
 }
 
-export default function Watchlist({ companies }: { companies: CompanySummary[] }) {
+function RemoveChips({ codes, remove }: { codes: string[]; remove: (c: string) => void }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {codes.map((c) => (
+        <button
+          key={c}
+          onClick={() => remove(c)}
+          className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted hover:border-down hover:text-down"
+        >
+          {c} ✕
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function Watchlist({ companies, funds }: { companies: CompanySummary[]; funds: FundSummary[] }) {
   const { list, remove, signedIn } = useWatchlist();
   const watched = useMemo(() => companies.filter((c) => list.includes(c.code)), [companies, list]);
+  const watchedFunds = useMemo(() => funds.filter((f) => list.includes(f.code)), [funds, list]);
   const [days, setDays] = useState(7);
 
   // Sayfa açılınca izlenen şirketlerin bildirimleri okundu sayılır (zildeki sayaç sıfırlanır)
-  const key = list.join(",");
+  const key = stockCodes(list).join(",");
   useEffect(() => {
     if (!key) return;
     fetchNews(key.split(","), 2)
@@ -148,15 +167,20 @@ export default function Watchlist({ companies }: { companies: CompanySummary[] }
   if (signedIn === undefined) return null;
   if (!signedIn) return <SignInPrompt />;
 
+  const summary = [
+    watched.length && `${watched.length} şirket`,
+    watchedFunds.length && `${watchedFunds.length} fon`,
+  ].filter(Boolean);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">İzleme Listesi</h1>
           <p className="mt-1 text-sm text-muted">
-            {list.length > 0
-              ? `${list.length} şirket izleniyor.`
-              : "Henüz şirket eklemedin. Şirket sayfalarındaki ya da tablolardaki ☆ işaretiyle ekleyebilirsin."}
+            {summary.length > 0
+              ? `${summary.join(" ve ")} izleniyor.`
+              : "Henüz bir şey eklemedin. Hisse ve fon sayfalarındaki ya da tablolardaki ☆ işaretiyle ekleyebilirsin."}
           </p>
         </div>
         <div className="card p-3">
@@ -167,21 +191,12 @@ export default function Watchlist({ companies }: { companies: CompanySummary[] }
       {watched.length > 0 && (
         <>
           <section>
+            <h2 className="mb-2 font-semibold">Hisseler</h2>
             <CompaniesTable
               companies={watched}
               columns={["price", "change", "change1y", "marketCap", "pe", "pb", "roe", "netMargin"]}
             />
-            <div className="mt-2 flex flex-wrap gap-2">
-              {watched.map((c) => (
-                <button
-                  key={c.code}
-                  onClick={() => remove(c.code)}
-                  className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted hover:border-down hover:text-down"
-                >
-                  {c.code} ✕
-                </button>
-              ))}
-            </div>
+            <RemoveChips codes={watched.map((c) => c.code)} remove={remove} />
           </section>
 
           <section className="card">
@@ -198,17 +213,29 @@ export default function Watchlist({ companies }: { companies: CompanySummary[] }
                 <option value={30}>Son 30 gün</option>
               </select>
             </div>
-            <NewsList codes={list} days={days} empty="Bu dönemde izlediğin şirketlerden bildirim yok." />
+            <NewsList codes={stockCodes(list)} days={days} empty="Bu dönemde izlediğin şirketlerden bildirim yok." />
           </section>
         </>
+      )}
+
+      {watchedFunds.length > 0 && (
+        <section>
+          <h2 className="mb-2 font-semibold">Fonlar</h2>
+          <FundsTable funds={watchedFunds} bare />
+          <RemoveChips codes={watchedFunds.map((f) => f.code)} remove={remove} />
+        </section>
       )}
 
       {list.length === 0 && (
         <div className="card p-8 text-center text-sm text-muted">
           <Link href="/" className="text-accent hover:underline">
-            Hisselere göz at
+            Hisselere
           </Link>{" "}
-          ve takip etmek istediklerini ☆ ile işaretle.
+          ya da{" "}
+          <Link href="/fonlar" className="text-accent hover:underline">
+            fonlara
+          </Link>{" "}
+          göz at ve takip etmek istediklerini ☆ ile işaretle.
         </div>
       )}
     </div>

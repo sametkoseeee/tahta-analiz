@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { stockCodes } from "@/lib/codes";
 import { fetchNews, type Disclosure } from "@/lib/news";
 import { getNotified, getRead, markNotified, notificationsEnabled, READ_EVENT } from "@/lib/notify";
 import { pushActive } from "@/lib/push";
@@ -18,7 +19,7 @@ export default function NewsBell() {
   const { list } = useWatchlist();
   const [items, setItems] = useState<Disclosure[]>([]);
   const [read, setRead] = useState<Set<number>>(() => new Set());
-  const key = list.join(",");
+  const key = stockCodes(list).join(","); // fonlar KAP'ta bildirim yayınlamaz
 
   useEffect(() => {
     if (!key) return;

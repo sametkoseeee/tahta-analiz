@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Item = { code: string; name: string };
+/** href yoksa hisse sayfasına gider; fonlar /fonlar/KOD */
+type Item = { code: string; name: string; href?: string; tag?: string };
 
 const fold = (s: string) => s.toLocaleLowerCase("tr-TR").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ı/g, "i");
 
@@ -31,10 +32,10 @@ export default function Search({ items }: { items: Item[] }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const go = (code: string) => {
+  const go = (item: Item) => {
     setQ("");
     setOpen(false);
-    router.push(`/sirketler/${code}`);
+    router.push(item.href ?? `/sirketler/${item.code}`);
   };
 
   return (
@@ -50,23 +51,24 @@ export default function Search({ items }: { items: Item[] }) {
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") setActive((a) => Math.min(a + 1, results.length - 1));
           else if (e.key === "ArrowUp") setActive((a) => Math.max(a - 1, 0));
-          else if (e.key === "Enter" && results[active]) go(results[active].code);
+          else if (e.key === "Enter" && results[active]) go(results[active]);
           else if (e.key === "Escape") setOpen(false);
         }}
-        placeholder="Hisse ara (ör. THYAO)"
+        placeholder="Hisse ya da fon ara (ör. THYAO, AFA)"
         className="h-9 w-full rounded-lg border border-border bg-surface-2 px-3 text-sm outline-none placeholder:text-muted focus:border-accent"
       />
       {open && results.length > 0 && (
         <ul className="absolute right-0 top-11 w-full min-w-64 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
           {results.map((r, i) => (
-            <li key={r.code}>
+            <li key={r.href ?? r.code}>
               <button
                 onMouseEnter={() => setActive(i)}
-                onClick={() => go(r.code)}
+                onClick={() => go(r)}
                 className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm ${i === active ? "bg-surface-2" : ""}`}
               >
-                <span className="w-14 font-semibold">{r.code}</span>
-                <span className="truncate text-muted">{r.name}</span>
+                <span className="w-14 shrink-0 font-semibold">{r.code}</span>
+                <span className="min-w-0 flex-1 truncate text-muted">{r.name}</span>
+                {r.tag && <span className="shrink-0 rounded bg-surface-2 px-1.5 text-[10px] text-muted">{r.tag}</span>}
               </button>
             </li>
           ))}

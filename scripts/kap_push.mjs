@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
+import { stockCodes } from "../lib/codes.ts";
 import { fetchKapDisclosures } from "../lib/kap-core.ts";
 
 const env = (name) => {
@@ -56,7 +57,8 @@ async function fetchWatchedDisclosures(watchedCodes) {
 
 async function main() {
   const watchRows = await fetchAll(() => db.from("watchlist").select("user_id, code"));
-  const watchedCodes = [...new Set(watchRows.map((r) => r.code))];
+  // İzleme listesindeki fonlar KAP'ta bildirim yayınlamaz
+  const watchedCodes = stockCodes([...new Set(watchRows.map((r) => r.code))]);
   if (watchedCodes.length === 0) return console.log("İzlenen şirket yok");
 
   // Yüzlerce şirketi aynı anda ilgilendiren toplu duyurular (ör. SPK işlem yasağı listesi) bildirim olarak gönderilmez

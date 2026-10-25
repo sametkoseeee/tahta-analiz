@@ -6,7 +6,7 @@ import NewsBell from "@/components/NewsBell";
 import Search from "@/components/Search";
 import UpdatedAt from "@/components/UpdatedAt";
 import WatchlistSync from "@/components/WatchlistSync";
-import { getIndex } from "@/lib/data";
+import { getFunds, getIndex } from "@/lib/data";
 import { LiveProvider } from "@/lib/live";
 import "./globals.css";
 
@@ -14,14 +14,17 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] 
 
 export const metadata: Metadata = {
   title: { default: "Tahta Analiz", template: "%s | Tahta Analiz" },
-  description: "BIST şirketlerinin mali tabloları, oranları, KAP bildirimleri ve hisse tarama aracı",
+  description: "BIST şirketlerinin mali tabloları, oranları, KAP bildirimleri, hisse tarama aracı ve TEFAS fonları",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100"),
   icons: { icon: "/icon.png", apple: "/icon.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { companies, updatedAt } = getIndex();
-  const items = companies.map((c) => ({ code: c.code, name: c.name }));
+  const items = [
+    ...companies.map((c) => ({ code: c.code, name: c.name })),
+    ...getFunds().funds.map((f) => ({ code: f.code, name: f.name, href: `/fonlar/${f.code}`, tag: "Fon" })),
+  ];
 
   return (
     <html lang="tr">

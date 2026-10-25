@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { changeClass, compact, fundPrice, num, signedPct } from "@/lib/format";
 import type { FundSummary } from "@/lib/types";
 import Sparkline from "./Sparkline";
+import WatchButton from "./WatchButton";
 
 type Key = "code" | "price" | "change" | "r1m" | "r3m" | "r6m" | "rytd" | "r1y" | "r3y" | "size" | "investors" | "risk";
 
@@ -37,7 +38,8 @@ function cell(f: FundSummary, k: Key): string {
 /** "Hisse Senedi Şemsiye Fonu" → "Hisse Senedi" */
 const short = (u: string) => u.replace(/\s*Şemsiye Fonu$/i, "").trim();
 
-export default function FundsTable({ funds }: { funds: FundSummary[] }) {
+/** bare: izleme listesindeki gibi az fon için filtre çubuğu olmadan */
+export default function FundsTable({ funds, bare = false }: { funds: FundSummary[]; bare?: boolean }) {
   const [q, setQ] = useState("");
   const [umbrella, setUmbrella] = useState("all");
   const [sort, setSort] = useState<{ key: Key; dir: 1 | -1 }>({ key: "size", dir: -1 });
@@ -89,7 +91,7 @@ export default function FundsTable({ funds }: { funds: FundSummary[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={`flex-wrap items-center gap-2 ${bare ? "hidden" : "flex"}`}>
         <select
           value={umbrella}
           onChange={(e) => {
@@ -131,12 +133,15 @@ export default function FundsTable({ funds }: { funds: FundSummary[] }) {
               {rows.map((f) => (
                 <tr key={f.code} className="border-b border-border last:border-0 hover:bg-surface-2">
                   <td className="px-3 py-2">
-                    <Link href={`/fonlar/${f.code}`} className="block min-w-0">
-                      <div className="font-semibold text-accent">{f.code}</div>
-                      <div className="max-w-64 truncate text-xs text-muted" title={f.name}>
-                        {f.name}
-                      </div>
-                    </Link>
+                    <div className="flex items-center gap-2.5">
+                      <WatchButton code={f.code} compact />
+                      <Link href={`/fonlar/${f.code}`} className="block min-w-0">
+                        <div className="font-semibold text-accent">{f.code}</div>
+                        <div className="max-w-64 truncate text-xs text-muted" title={f.name}>
+                          {f.name}
+                        </div>
+                      </Link>
+                    </div>
                   </td>
                   <td className="px-3 py-2">
                     <Sparkline values={f.spark} />

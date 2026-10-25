@@ -1,5 +1,6 @@
 import "server-only";
 import kapOids from "@/data/kap_oids.json";
+import { stockCodes } from "./codes";
 import { fetchKapDisclosures } from "./kap-core";
 import type { Disclosure } from "./news";
 
@@ -19,7 +20,9 @@ async function cached(key: string, load: () => Promise<Disclosure[]>) {
 }
 
 /** Verilen şirketlerin son `days` gündeki KAP bildirimleri (yeniden eskiye), 1 dakika önbellekli */
-export async function getDisclosuresFor(codes: string[], days: number): Promise<Disclosure[]> {
+export async function getDisclosuresFor(allCodes: string[], days: number): Promise<Disclosure[]> {
+  // Fon kodları KAP'ta yok; boşuna tüm bildirimleri çektirmesin
+  const codes = stockCodes(allCodes);
   const wanted = new Set(codes);
   const known = codes.filter((c) => OIDS[c]).sort();
   const unknown = codes.filter((c) => !OIDS[c]);

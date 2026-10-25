@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PriceChart from "@/components/PriceChart";
+import WatchButton from "@/components/WatchButton";
 import { getFund, getFunds } from "@/lib/data";
 import { changeClass, compact, fundPrice, num, pct, signedPct } from "@/lib/format";
 
@@ -59,6 +60,7 @@ export default async function FundPage({ params }: Props) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-3xl font-bold tracking-tight">{f.code}</h1>
+            <WatchButton code={f.code} />
             {f.umbrella && (
               <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{f.umbrella}</span>
             )}
