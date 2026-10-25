@@ -1,4 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+﻿# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -41,9 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# script ile üretilen veri (python scripts/fetch_data.py)
+# script ile Ã¼retilen veri (python scripts/fetch_data.py)
 /data/*
 !/data/tickers.json
+!/data/kap_oids.json
 
 # python
 __pycache__/

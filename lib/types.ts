@@ -67,6 +67,8 @@ export type CompanyDetail = {
   sector: string;
   industry: string | null;
   summary: string | null;
+  /** "tr" = content/ozetler çevirisi, "en" = Yahoo'nun İngilizce metni */
+  summaryLang?: "tr" | "en";
   website: string | null;
   employees: number | null;
   city: string | null;

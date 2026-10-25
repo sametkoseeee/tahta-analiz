@@ -13,6 +13,8 @@ type RawDisclosure = {
   subject: string | null;
   disclosureIndex: number;
   stockCodes: string | null;
+  /** MKK/Borsa İstanbul duyurularında ilgili hisseler bu alanda gelir */
+  relatedStocks: string | null;
 };
 
 const ENDPOINT = "https://kap.org.tr/tr/api/disclosure/members/byCriteria";
@@ -31,7 +33,7 @@ function toDisclosure(r: RawDisclosure): Disclosure {
   return {
     id: r.disclosureIndex,
     date: parseKapDate(r.publishDate),
-    codes: (r.stockCodes ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+    codes: (r.stockCodes || r.relatedStocks || "").split(",").map((s) => s.trim()).filter(Boolean),
     company: r.kapTitle,
     subject: r.subject ?? r.summary ?? "Bildirim",
     summary: r.summary && r.summary !== r.subject ? r.summary : null,
@@ -40,8 +42,28 @@ function toDisclosure(r: RawDisclosure): Disclosure {
   };
 }
 
-/** Son `days` gündeki işlem gören şirket bildirimleri, yeniden eskiye */
-export async function fetchKapDisclosures(days: number): Promise<Disclosure[]> {
+/**
+ * Son `days` gündeki işlem gören şirket bildirimleri, yeniden eskiye.
+ * KAP tek sorguda en fazla 2000 bildirim döndürür; uzun dönemler için `oids` (KAP şirket
+ * kimlikleri, data/kap_oids.json) ile şirkete göre filtrelemek gerekir.
+ */
+export async function fetchKapDisclosures(days: number, oids: string[] = []): Promise<Disclosure[]> {
+  if (oids.length <= OIDS_PER_REQUEST) return fetchOnce(days, oids);
+  const parts: Disclosure[][] = [];
+  for (let i = 0; i < oids.length; i += OIDS_PER_REQUEST) {
+    parts.push(await fetchOnce(days, oids.slice(i, i + OIDS_PER_REQUEST)));
+  }
+  const seen = new Set<number>();
+  return parts
+    .flat()
+    .filter((d) => !seen.has(d.id) && seen.add(d.id))
+    .sort((a, b) => b.id - a.id);
+}
+
+// KAP'ın yanıt süresi şirket sayısıyla hızla artıyor (20 şirket ~3 sn, 30 şirket ~25 sn)
+const OIDS_PER_REQUEST = 15;
+
+async function fetchOnce(days: number, oids: string[]): Promise<Disclosure[]> {
   const now = new Date();
   const res = await fetch(ENDPOINT, {
     method: "POST",
@@ -50,7 +72,7 @@ export async function fetchKapDisclosures(days: number): Promise<Disclosure[]> {
       fromDate: kapDay(new Date(now.getTime() - (days - 1) * 86_400_000)),
       toDate: kapDay(now),
       memberType: "IGS", // işlem gören şirketler
-      mkkMemberOidList: [],
+      mkkMemberOidList: oids,
       inactiveMkkMemberOidList: [],
       disclosureClass: "",
       subjectList: [],
@@ -70,7 +92,7 @@ export async function fetchKapDisclosures(days: number): Promise<Disclosure[]> {
       srcCategory: "",
       disclosureIndexList: [],
     }),
-    signal: AbortSignal.timeout(20_000),
+    signal: AbortSignal.timeout(40_000),
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`KAP ${res.status}`);

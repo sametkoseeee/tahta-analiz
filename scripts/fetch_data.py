@@ -35,6 +35,7 @@ EXCLUDE = {"ISATR", "ISBTR", "ISKUR"}
 
 
 INDICES_PATH = DATA / "indices.json"
+KAP_OIDS_PATH = DATA / "kap_oids.json"  # git'te tutulur (KAP bildirim göndericisi kullanır)
 
 # KAP'taki endeks kodlarının adları. Sektör endeksleri öncelik sırasıyla (en özelden genele):
 # bir şirket birden çok sektör endeksindeyse ilk eşleşen onun sektörü olur.
@@ -102,6 +103,13 @@ def fetch_indices():
             members[code] = stocks
     if "XU100" not in members or len(members["XU100"]) != 100:
         raise RuntimeError("KAP endeks sayfasının yapısı değişmiş olabilir: XU100 bulunamadı")
+
+    # Hisse kodu → KAP şirket kimliği. Bildirim sorgusu şirkete göre filtrelenirken gerekir
+    # (KAP tek sorguda en fazla 2000 bildirim döndürdüğü için tüm bildirimleri çekip süzmek olmuyor).
+    oids = dict(re.findall(r'"stockCode":"([A-Z0-9]+)","title":"[^"]*","mkkMemberOid":"([0-9a-f]+)"', body))
+    if len(oids) > 400:
+        KAP_OIDS_PATH.write_text(json.dumps(dict(sorted(oids.items())), indent=0), encoding="utf-8")
+        print(f"{len(oids)} KAP şirket kimliği → {KAP_OIDS_PATH}")
     out = {
         "updatedAt": datetime.now(timezone.utc).isoformat(),
         "indices": [
@@ -129,18 +137,45 @@ def enrich(index):
         for s in ix["members"]:
             by_code.setdefault(s, []).append(ix["code"])
 
+    summaries, industries = load_translations()
+    untranslated = []
+
     for code, c in index.items():
         codes = by_code.get(code, [])
         c["indices"] = [i for i in MAIN_INDICES if i in codes]
         sector = next((SECTOR_INDICES[i] for i in SECTOR_INDICES if i in codes), None)
         if sector:
             c["sector"] = sector
+        c["industry"] = industries.get(c.get("industry"), c.get("industry"))
         path = COMPANIES_DIR / f"{code}.json"
         if path.exists():
             d = json.loads(path.read_text(encoding="utf-8"))
-            if d.get("sector") != c["sector"] or d.get("indices") != c["indices"]:
-                d["sector"], d["indices"] = c["sector"], c["indices"]
-                path.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+            before = json.dumps(d, ensure_ascii=False)
+            d["sector"], d["indices"], d["industry"] = c["sector"], c["indices"], c["industry"]
+            # Yahoo açıklaması İngilizce gelir; çevirisi varsa Türkçesi kullanılır
+            if code in summaries:
+                if d.get("summaryLang") != "tr":
+                    d["summaryEn"] = d.get("summary")
+                d["summary"], d["summaryLang"] = summaries[code], "tr"
+            elif d.get("summary"):
+                d["summaryLang"] = "en"
+                untranslated.append(code)
+            after = json.dumps(d, ensure_ascii=False)
+            if after != before:
+                path.write_text(after, encoding="utf-8")
+    if untranslated:
+        print(f"Açıklaması henüz Türkçeye çevrilmemiş {len(untranslated)} şirket "
+              f"(content/ozetler'e eklenebilir): {' '.join(untranslated[:30])}")
+
+
+def load_translations():
+    """content/ozetler/*.json (kod → Türkçe açıklama) ve content/sektorler.json (Yahoo sektörü → Türkçe)."""
+    summaries = {}
+    for f in sorted((ROOT / "content" / "ozetler").glob("*.json")):
+        summaries.update(json.loads(f.read_text(encoding="utf-8")))
+    industries_path = ROOT / "content" / "sektorler.json"
+    industries = json.loads(industries_path.read_text(encoding="utf-8")) if industries_path.exists() else {}
+    return summaries, industries
 
 
 def refresh_tickers():

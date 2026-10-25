@@ -75,7 +75,10 @@ export default async function CompanyPage({ params }: Props) {
 
       {c.summary && (
         <section className="card p-4">
-          <h2 className="mb-2 font-semibold">Şirket Hakkında</h2>
+          <h2 className="mb-2 font-semibold">
+            Şirket Hakkında
+            {c.summaryLang === "en" && <span className="ml-2 text-xs font-normal text-muted">(henüz çevrilmedi)</span>}
+          </h2>
           <p className="text-sm leading-relaxed text-muted">{c.summary}</p>
           <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
             {c.industry && <span><span className="text-muted">Sektör: </span>{c.industry}</span>}

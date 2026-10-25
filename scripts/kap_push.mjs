@@ -1,6 +1,7 @@
 // İzleme listelerindeki şirketler için yeni KAP bildirimlerini Web Push ile gönderir.
 // GitHub Actions'ta 10 dakikada bir çalışır (.github/workflows/kap-bildirim.yml).
 // Yerelde: node --env-file=.env.local scripts/kap_push.mjs
+import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { fetchKapDisclosures } from "../lib/kap-core.ts";
@@ -12,6 +13,7 @@ const env = (name) => {
 };
 
 const MAX_PER_USER = 5; // bir turda kullanıcı başına ayrı bildirim; fazlası tek özet bildirimde
+const MAX_CODES_PER_NOTICE = 10; // bundan çok şirketi ilgilendiren toplu duyurular gönderilmez
 const KEEP_DAYS = 7; // gönderildi kayıtlarını bu kadar gün tut
 
 const db = createClient(env("NEXT_PUBLIC_SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), {
@@ -26,9 +28,40 @@ async function check(res) {
   return { data, count };
 }
 
+/** Supabase tek seferde en fazla 1000 satır döndürür; tümünü sayfa sayfa al */
+async function fetchAll(query) {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data } = await check(query().range(from, from + 999));
+    rows.push(...data);
+    if (data.length < 1000) return rows;
+  }
+}
+
+/** İzlenen şirketlerin son 2 günlük bildirimleri (dün + bugün, gece yarısı geçişi için) */
+async function fetchWatchedDisclosures(watchedCodes) {
+  const oids = JSON.parse(readFileSync(new URL("../data/kap_oids.json", import.meta.url), "utf8"));
+  const known = watchedCodes.filter((c) => oids[c]);
+  const unknown = new Set(watchedCodes.filter((c) => !oids[c]));
+  const lists = [];
+  if (known.length) lists.push(await fetchKapDisclosures(2, known.map((c) => oids[c])));
+  // KAP kimliği bilinmeyenler: tüm bildirimler (2 günde 2000 sınırının altında kalır) süzülür
+  if (unknown.size) lists.push((await fetchKapDisclosures(2)).filter((d) => d.codes.some((c) => unknown.has(c))));
+  const seen = new Set();
+  return lists
+    .flat()
+    .filter((d) => !seen.has(d.id) && seen.add(d.id))
+    .sort((a, b) => b.id - a.id);
+}
+
 async function main() {
-  const items = await fetchKapDisclosures(2); // dün + bugün (gece yarısı geçişi için)
-  if (items.length === 0) return console.log("KAP: bildirim yok");
+  const watchRows = await fetchAll(() => db.from("watchlist").select("user_id, code"));
+  const watchedCodes = [...new Set(watchRows.map((r) => r.code))];
+  if (watchedCodes.length === 0) return console.log("İzlenen şirket yok");
+
+  // Yüzlerce şirketi aynı anda ilgilendiren toplu duyurular (ör. SPK işlem yasağı listesi) bildirim olarak gönderilmez
+  const items = (await fetchWatchedDisclosures(watchedCodes)).filter((d) => d.codes.length <= MAX_CODES_PER_NOTICE);
+  if (items.length === 0) return console.log("KAP: izlenen şirketlerde bildirim yok");
 
   const minId = Math.min(...items.map((d) => d.id));
   const { data: sentRows } = await check(db.from("sent_disclosures").select("disclosure_id").gte("disclosure_id", minId));
@@ -45,10 +78,6 @@ async function main() {
 
   // Önce kaydet: bir hata olursa aynı bildirim tekrar tekrar gönderilmesin
   await check(db.from("sent_disclosures").upsert(fresh.map((d) => ({ disclosure_id: d.id }))));
-
-  const codes = [...new Set(fresh.flatMap((d) => d.codes))];
-  const { data: watchRows } = await check(db.from("watchlist").select("user_id, code").in("code", codes));
-  if (watchRows.length === 0) return console.log(`${fresh.length} yeni bildirim; izleyen yok`);
 
   // Kullanıcı → o kullanıcıyı ilgilendiren yeni bildirimler
   const watchers = new Map(); // code → Set(user_id)
