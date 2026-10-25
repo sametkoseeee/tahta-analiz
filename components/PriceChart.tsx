@@ -53,8 +53,8 @@ export default function PriceChart({
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="text-sm">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="whitespace-nowrap text-sm">
           <span className="text-muted">Dönem getirisi </span>
           <span className={`font-semibold ${changeClass(change)}`}>{signedPct(change)}</span>
         </div>

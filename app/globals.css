@@ -63,3 +63,11 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* Telefonda yatay kaydırılan menü ve sekmelerde kaydırma çubuğunu gizle */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

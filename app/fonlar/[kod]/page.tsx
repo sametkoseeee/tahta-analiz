@@ -67,7 +67,7 @@ export default async function FundPage({ params }: Props) {
           </div>
           <p className="mt-1 text-muted">{f.name}</p>
         </div>
-        <div className="text-right">
+        <div className="sm:text-right">
           <div className="text-3xl font-semibold tabular">{fundPrice(f.price)} ₺</div>
           <div className={`text-sm font-medium tabular ${changeClass(f.change)}`}>
             {signedPct(f.change)} <span className="font-normal text-muted">günlük · {date}</span>

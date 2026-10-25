@@ -117,11 +117,11 @@ export default function Statements({ company }: { company: Financials }) {
           <table className="w-full text-sm tabular">
             <thead className="text-xs text-muted">
               <tr className="border-b border-border">
-                <th className="sticky left-0 bg-surface px-4 py-2.5 text-left font-medium">
+                <th className="sticky left-0 z-10 bg-surface px-3 py-2.5 text-left font-medium sm:px-4">
                   Milyon {company.financialCurrency}
                 </th>
                 {order.map((i) => (
-                  <th key={i} className="whitespace-nowrap px-4 py-2.5 text-right font-medium">
+                  <th key={i} className="whitespace-nowrap px-3 py-2.5 text-right font-medium sm:px-4">
                     {periodLabel(s.periods[i], annual)}
                   </th>
                 ))}
@@ -129,12 +129,15 @@ export default function Statements({ company }: { company: Financials }) {
             </thead>
             <tbody>
               {s.rows.map((r) => (
-                <tr key={r.label} className={`border-b border-border last:border-0 hover:bg-surface-2 ${BOLD_ROWS.has(r.label) ? "font-semibold" : ""}`}>
-                  <td className="sticky left-0 whitespace-nowrap bg-surface px-4 py-2">{r.label}</td>
+                <tr key={r.label} className={`group border-b border-border last:border-0 hover:bg-surface-2 ${BOLD_ROWS.has(r.label) ? "font-semibold" : ""}`}>
+                  {/* Telefonda uzun kalem adları iki satıra bölünür, yanında daha çok dönem görünür */}
+                  <td className="sticky left-0 z-10 min-w-36 max-w-44 bg-surface px-3 py-2 leading-snug group-hover:bg-surface-2 sm:max-w-none sm:whitespace-nowrap sm:px-4">
+                    {r.label}
+                  </td>
                   {order.map((i) => {
                     const v = r.values[i];
                     return (
-                      <td key={i} className={`whitespace-nowrap px-4 py-2 text-right ${v != null && v < 0 ? "text-down" : ""}`}>
+                      <td key={i} className={`whitespace-nowrap px-3 py-2 text-right sm:px-4 ${v != null && v < 0 ? "text-down" : ""}`}>
                         {RAW_ROWS.has(r.label) ? num(v) : millions(v)}
                       </td>
                     );

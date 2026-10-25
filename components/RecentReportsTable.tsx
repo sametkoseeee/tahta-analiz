@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { changeClass, compact, num, periodLabel, signedPct } from "@/lib/format";
 import { useLiveCompanies } from "@/lib/live";
 import type { RecentReport } from "@/lib/reports";
+import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
 import WatchButton from "./WatchButton";
 
 type Key = "code" | "at" | "price" | "change" | "marketCap" | "netProfit" | "netProfitYoY" | "pe" | "pb";
@@ -43,7 +44,11 @@ export default function RecentReportsTable({ reports }: { reports: RecentReport[
   const rows = list.slice(current * PAGE, (current + 1) * PAGE);
 
   const th = (key: Key, label: string, align = "text-right", title?: string) => (
-    <th className={`whitespace-nowrap px-3 py-2.5 font-medium ${align}`} title={title}>
+    <th
+      key={key}
+      className={`whitespace-nowrap px-3 py-2.5 font-medium ${align} ${key === "code" ? STICKY_HEAD : ""}`}
+      title={title}
+    >
       <button
         onClick={() => {
           setSort((s) => (s.key === key ? { key, dir: (s.dir * -1) as 1 | -1 } : { key, dir: key === "code" ? 1 : -1 }));
@@ -99,13 +104,13 @@ export default function RecentReportsTable({ reports }: { reports: RecentReport[
               {rows.map((r) => {
                 const at = new Date(r.at);
                 return (
-                  <tr key={r.code} className="border-b border-border last:border-0 hover:bg-surface-2">
-                    <td className="px-3 py-2">
+                  <tr key={r.code} className="group border-b border-border last:border-0 hover:bg-surface-2">
+                    <td className={`px-3 py-2 ${STICKY_CELL}`}>
                       <div className="flex items-center gap-2.5">
                         <WatchButton code={r.code} compact />
                         <Link href={`/sirketler/${r.code}`} className="block min-w-0">
                           <div className="font-semibold text-accent">{r.code}</div>
-                          <div className="max-w-52 truncate text-xs text-muted">{r.name}</div>
+                          <div className="max-w-28 truncate text-xs text-muted sm:max-w-52">{r.name}</div>
                         </Link>
                       </div>
                     </td>

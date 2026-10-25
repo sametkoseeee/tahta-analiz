@@ -17,7 +17,8 @@ const timeFmt = new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-d
 export function LivePrice({ code, metrics }: { code: string; metrics: Metrics }) {
   const { m, updatedAt } = useCompanyMetrics(code, metrics);
   return (
-    <div className="text-right tabular">
+    // Telefonda başlığın altına iner, sola hizalı; geniş ekranda sağda
+    <div className="tabular sm:text-right">
       <div className="text-3xl font-semibold">{num(m.price)} ₺</div>
       <div className={`text-sm font-medium ${changeClass(m.change)}`}>{signedPct(m.change)} bugün</div>
       {updatedAt && (

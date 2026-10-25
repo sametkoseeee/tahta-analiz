@@ -87,8 +87,9 @@ export default function Radar({ companies }: { companies: CompanySummary[] }) {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-      <aside className="space-y-4">
+    // minmax(0,…): uzun açılır liste seçenekleri sütunu ekrandan taşırmasın (telefon)
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <aside className="min-w-0 space-y-4">
         <div className="card flex items-center justify-between gap-3 p-4">
           <h2 className="text-sm font-semibold">Endeks</h2>
           <select

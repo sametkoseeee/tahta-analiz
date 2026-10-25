@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { changeClass, compact, fundPrice, num, signedPct } from "@/lib/format";
 import type { FundSummary } from "@/lib/types";
+import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
 import Sparkline from "./Sparkline";
 import WatchButton from "./WatchButton";
 
@@ -75,7 +76,11 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
   const rows = list.slice(current * PAGE, (current + 1) * PAGE);
 
   const header = (key: Key, label: string, title?: string, align = "text-right") => (
-    <th key={key} className={`whitespace-nowrap px-3 py-2.5 font-medium ${align}`} title={title}>
+    <th
+      key={key}
+      className={`whitespace-nowrap px-3 py-2.5 font-medium ${align} ${key === "code" ? STICKY_HEAD : ""}`}
+      title={title}
+    >
       <button
         onClick={() => {
           setSort((s) => (s.key === key ? { key, dir: (s.dir * -1) as 1 | -1 } : { key, dir: key === "code" ? 1 : -1 }));
@@ -131,13 +136,13 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
             </thead>
             <tbody>
               {rows.map((f) => (
-                <tr key={f.code} className="border-b border-border last:border-0 hover:bg-surface-2">
-                  <td className="px-3 py-2">
+                <tr key={f.code} className="group border-b border-border last:border-0 hover:bg-surface-2">
+                  <td className={`px-3 py-2 ${STICKY_CELL}`}>
                     <div className="flex items-center gap-2.5">
                       <WatchButton code={f.code} compact />
                       <Link href={`/fonlar/${f.code}`} className="block min-w-0">
                         <div className="font-semibold text-accent">{f.code}</div>
-                        <div className="max-w-64 truncate text-xs text-muted" title={f.name}>
+                        <div className="max-w-28 truncate text-xs text-muted sm:max-w-64" title={f.name}>
                           {f.name}
                         </div>
                       </Link>

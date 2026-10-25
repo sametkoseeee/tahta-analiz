@@ -41,7 +41,7 @@ export default function UpcomingReportsPage() {
                 </h2>
                 <span className="text-xs text-muted">{items.length} şirket</span>
               </div>
-              <ul className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid grid-cols-[minmax(0,1fr)] gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((u) => (
                   <li key={u.code} className="flex items-center gap-3 bg-surface px-4 py-3">
                     <WatchButton code={u.code} compact />

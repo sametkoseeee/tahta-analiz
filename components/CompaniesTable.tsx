@@ -23,7 +23,11 @@ export function sortCompanies(list: CompanySummary[], sort: SortState) {
   });
 }
 
-const CHANGE_KEYS = new Set<MetricKey>(["change", "change1y", "revenueGrowth", "netIncomeGrowth"]);
+/** Yatay kaydırırken hisse sütunu sabit kalsın (telefonda tablo ekrana sığmıyor) */
+export const STICKY_HEAD = "sticky left-0 z-10 bg-surface";
+export const STICKY_CELL = "sticky left-0 z-10 bg-surface group-hover:bg-surface-2";
+
+const CHANGE_KEYS =new Set<MetricKey>(["change", "change1y", "revenueGrowth", "netIncomeGrowth"]);
 
 export default function CompaniesTable({
   companies,
@@ -60,7 +64,11 @@ export default function CompaniesTable({
   const rows = sorted.slice(page * pageSize, (page + 1) * pageSize);
 
   const header = (key: SortState["key"], label: string, title?: string, align = "text-right") => (
-    <th className={`whitespace-nowrap px-3 py-2.5 font-medium ${align}`} title={title}>
+    <th
+      key={key}
+      className={`whitespace-nowrap px-3 py-2.5 font-medium ${align} ${key === "code" ? STICKY_HEAD : ""}`}
+      title={title}
+    >
       <button
         onClick={() => setSort((s) => (s.key === key ? { key, dir: (s.dir * -1) as 1 | -1 } : { key, dir: key === "code" ? 1 : -1 }))}
         className={`inline-flex items-center gap-1 hover:text-text ${sort.key === key ? "text-text" : ""}`}
@@ -84,13 +92,13 @@ export default function CompaniesTable({
         </thead>
         <tbody>
           {rows.map((c) => (
-            <tr key={c.code} className="border-b border-border last:border-0 hover:bg-surface-2">
-              <td className="px-3 py-2">
+            <tr key={c.code} className="group border-b border-border last:border-0 hover:bg-surface-2">
+              <td className={`px-3 py-2 ${STICKY_CELL}`}>
                 <div className="flex items-center gap-2.5">
                   <WatchButton code={c.code} compact />
                   <Link href={`/sirketler/${c.code}`} className="block min-w-0">
                     <div className="font-semibold text-accent">{c.code}</div>
-                    <div className="max-w-56 truncate text-xs text-muted">{c.name}</div>
+                    <div className="max-w-28 truncate text-xs text-muted sm:max-w-56">{c.name}</div>
                   </Link>
                 </div>
               </td>
