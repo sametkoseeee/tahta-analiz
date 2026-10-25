@@ -2,7 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { authErrorMessage, safeNext } from "@/lib/auth";
+import { authErrorMessage } from "@/lib/auth";
+import { safeNext } from "@/lib/redirect";
 import { getSupabase } from "@/lib/supabase/client";
 import { supabaseEnabled } from "@/lib/supabase/config";
 

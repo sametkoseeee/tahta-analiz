@@ -50,11 +50,6 @@ export function goToLogin(signup = false) {
   window.location.href = `/giris?${signup ? "kayit=1&" : ""}next=${next}`;
 }
 
-/** Yalnızca site içi yollara dönülür (açık yönlendirme olmasın) */
-export function safeNext(next: string | null, fallback = "/izleme-listesi"): string {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
-}
-
 /** Supabase hata mesajlarının Türkçesi */
 export function authErrorMessage(message: string): string {
   const m = message.toLowerCase();
