@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # Önceki çalıştırmanın verisi: çekimde hata alan şirketler eski haliyle kalır
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
         with:
           path: data
           key: veri-${{ github.run_id }}
@@ -39,6 +39,13 @@ jobs:
         # Kod gönderiminde, önbellekte veri varsa yeniden çekme (hızlı yayın)
         if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
         run: python -u scripts/fetch_data.py --refresh-list
+
+      # Sonraki adımlar (Vercel) hata verse de çekilen veri saklansın; uzun ilk çekim boşa gitmesin
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('data/companies.json') != ''
+        with:
+          path: data
+          key: veri-${{ github.run_id }}-${{ github.run_attempt }}
 
       - uses: actions/setup-node@v4
         with:
