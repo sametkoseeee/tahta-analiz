@@ -1,25 +1,58 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { getSupabase } from "./supabase/client";
 
-/** Oturum açmış kullanıcı; undefined = henüz bilinmiyor, null = giriş yapılmamış */
+/**
+ * Oturum tüm sayfa için tek yerden izlenir (tablodaki her ☆ düğmesi ayrı istek atmasın).
+ * undefined = henüz bilinmiyor, null = giriş yapılmamış.
+ */
+let current: User | null | undefined = undefined;
+let started = false;
+const listeners = new Set<() => void>();
+
+function set(user: User | null) {
+  if (user?.id === current?.id && current !== undefined) return;
+  current = user;
+  listeners.forEach((l) => l());
+}
+
+function start() {
+  if (started) return;
+  started = true;
+  const supabase = getSupabase();
+  if (!supabase) {
+    set(null);
+    return;
+  }
+  supabase.auth.getSession().then(({ data }) => set(data.session?.user ?? null));
+  supabase.auth.onAuthStateChange((_event, session) => set(session?.user ?? null));
+}
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  start();
+  return () => listeners.delete(cb);
+}
+
 export function useUser(): User | null | undefined {
-  const [user, setUser] = useState<User | null | undefined>(undefined);
+  return useSyncExternalStore(
+    subscribe,
+    () => current,
+    () => undefined,
+  );
+}
 
-  useEffect(() => {
-    const supabase = getSupabase();
-    if (!supabase) {
-      setUser(null);
-      return;
-    }
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
-    return () => data.subscription.unsubscribe();
-  }, []);
+/** Giriş sayfasına, giriş sonrası bu sayfaya dönülecek şekilde yönlendirir */
+export function goToLogin(signup = false) {
+  const next = encodeURIComponent(window.location.pathname + window.location.search);
+  window.location.href = `/giris?${signup ? "kayit=1&" : ""}next=${next}`;
+}
 
-  return user;
+/** Yalnızca site içi yollara dönülür (açık yönlendirme olmasın) */
+export function safeNext(next: string | null, fallback = "/izleme-listesi"): string {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
 }
 
 /** Supabase hata mesajlarının Türkçesi */

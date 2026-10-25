@@ -3,9 +3,10 @@
 import { useWatchlist } from "@/lib/watchlist";
 
 export default function WatchButton({ code, compact = false }: { code: string; compact?: boolean }) {
-  const { has, toggle } = useWatchlist();
+  const { has, toggle, signedIn } = useWatchlist();
   const on = has(code);
-  const label = on ? "İzleme listesinden çıkar" : "İzleme listesine ekle";
+  // Üye değilse tıklayınca giriş sayfasına gider, girişten sonra bu sayfaya döner
+  const label = signedIn === false ? "İzlemek için giriş yap" : on ? "İzleme listesinden çıkar" : "İzleme listesine ekle";
 
   if (compact) {
     return (
@@ -26,6 +27,7 @@ export default function WatchButton({ code, compact = false }: { code: string; c
   return (
     <button
       onClick={() => toggle(code)}
+      title={label}
       className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium ${
         on ? "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400" : "border-border hover:bg-surface-2"
       }`}

@@ -1,11 +1,12 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { goToLogin, useUser } from "./auth";
 import { getSupabase } from "./supabase/client";
 
 /**
- * İzleme listesi her zaman tarayıcıda (localStorage) tutulur; giriş yapılmışsa Supabase'teki
- * `watchlist` tablosuyla eşitlenir, böylece tüm cihazlarda aynı olur.
+ * İzleme listesi yalnızca üyelere açık. Asıl kayıt Supabase'teki `watchlist` tablosu;
+ * tarayıcıdaki (localStorage) kopya sayfalar arası hızlı gösterim içindir ve çıkışta silinir.
  */
 const KEY = "izleme-listesi";
 const EVENT = "izleme-listesi-degisti";
@@ -61,32 +62,38 @@ async function syncRemote(code: string, add: boolean) {
   else await supabase.from("watchlist").delete().eq("user_id", userId).eq("code", code);
 }
 
-/** Girişte: tarayıcıdaki liste ile hesaptakini birleştir, ikisini de güncelle */
-export async function mergeWithAccount(userId: string) {
+/** Girişte: hesaptaki listeyi tarayıcıya al (tarayıcıda kalmış eski liste hesaba karışmaz) */
+export async function loadFromAccount() {
   const supabase = getSupabase();
   if (!supabase) return;
   const { data, error } = await supabase.from("watchlist").select("code").order("created_at");
   if (error) return;
-  const remote = data.map((r) => r.code as string);
-  const local = read();
-  const missingRemote = local.filter((c) => !remote.includes(c));
-  if (missingRemote.length) {
-    await supabase.from("watchlist").upsert(missingRemote.map((code) => ({ user_id: userId, code })));
-  }
-  write([...remote, ...missingRemote]);
+  write(data.map((r) => r.code as string));
+}
+
+/** Çıkışta ya da oturum yokken: tarayıcıdaki kopyayı sil (ortak bilgisayarda başkası görmesin) */
+export function clearLocal() {
+  if (read().length) write([]);
 }
 
 export function useWatchlist() {
-  const list = useSyncExternalStore(subscribe, read, () => EMPTY);
+  const user = useUser();
+  const stored = useSyncExternalStore(subscribe, read, () => EMPTY);
+  const list = user ? stored : EMPTY;
   return {
     list,
+    /** undefined = oturum henüz bilinmiyor */
+    signedIn: user === undefined ? undefined : Boolean(user),
     has: (code: string) => list.includes(code),
     toggle: (code: string) => {
+      if (user === undefined) return;
+      if (!user) return goToLogin();
       const add = !list.includes(code);
       write(add ? [...list, code] : list.filter((c) => c !== code));
       void syncRemote(code, add);
     },
     remove: (code: string) => {
+      if (!user) return;
       write(list.filter((c) => c !== code));
       void syncRemote(code, false);
     },

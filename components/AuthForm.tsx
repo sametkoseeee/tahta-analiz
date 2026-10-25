@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { authErrorMessage } from "@/lib/auth";
+import { authErrorMessage, safeNext } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase/client";
 import { supabaseEnabled } from "@/lib/supabase/config";
 
@@ -21,6 +21,8 @@ export default function AuthForm() {
     params.get("hata") ? "Bağlantının süresi dolmuş ya da geçersiz. Tekrar dene." : null,
   );
   const [info, setInfo] = useState<string | null>(null);
+  // Girişten sonra gelinen sayfaya dön (ör. ☆'a basılan şirket sayfası)
+  const next = safeNext(params.get("next"));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,11 +36,15 @@ export default function AuthForm() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push("/izleme-listesi");
+        router.push(next);
       } else if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirect } });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${redirect}?next=${encodeURIComponent(next)}` },
+        });
         if (error) throw error;
-        if (data.session) router.push("/izleme-listesi");
+        if (data.session) router.push(next);
         else setInfo("Doğrulama bağlantısı e-posta adresine gönderildi. Bağlantıya tıklayınca giriş yapmış olacaksın.");
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${redirect}?next=/hesap` });

@@ -2,14 +2,15 @@
 
 import { useEffect } from "react";
 import { useUser } from "@/lib/auth";
-import { mergeWithAccount } from "@/lib/watchlist";
+import { clearLocal, loadFromAccount } from "@/lib/watchlist";
 
-/** Kullanıcı giriş yapınca izleme listesini hesapla birleştirir. Görünür bir şey çizmez. */
+/** Girişte izleme listesini hesaptan yükler, çıkışta tarayıcıdaki kopyayı siler. Görünür bir şey çizmez. */
 export default function WatchlistSync() {
   const user = useUser();
   const userId = user?.id;
   useEffect(() => {
-    if (userId) void mergeWithAccount(userId);
-  }, [userId]);
+    if (userId) void loadFromAccount();
+    else if (user === null) clearLocal();
+  }, [userId, user]);
   return null;
 }

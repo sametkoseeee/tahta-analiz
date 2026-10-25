@@ -6,7 +6,6 @@ import { useUser } from "@/lib/auth";
 import { fetchNews } from "@/lib/news";
 import { markRead, notificationsEnabled, notificationsSupported, setNotificationsEnabled } from "@/lib/notify";
 import { currentSubscription, disablePush, enablePush, pushActive, pushSupported } from "@/lib/push";
-import { supabaseEnabled } from "@/lib/supabase/config";
 import type { CompanySummary } from "@/lib/types";
 import { useWatchlist } from "@/lib/watchlist";
 import CompaniesTable from "./CompaniesTable";
@@ -63,7 +62,7 @@ function PushToggle() {
   );
 }
 
-/** Giriş yapılmamışsa: yalnızca site açıkken çalışan sekme içi bildirimler */
+/** Tarayıcı Web Push desteklemiyorsa: yalnızca site açıkken çalışan sekme içi bildirimler */
 function TabNotificationToggle() {
   const [on, setOn] = useState(false);
   const [supported, setSupported] = useState(true);
@@ -94,14 +93,31 @@ function TabNotificationToggle() {
             ? "Bildirim izni tarayıcıda engellenmiş; adres çubuğundaki site ayarlarından izin verebilirsin."
             : "İzlediğin şirketler KAP'ta bildirim yayınladığında uyarı alırsın. Site bir sekmede açık olmalı."}
         </div>
-        {supabaseEnabled && (
-          <div className="mt-1 text-xs">
-            <Link href="/giris" className="text-accent hover:underline">
-              Giriş yaparsan
-            </Link>{" "}
-            bildirimler site kapalıyken de gelir.
-          </div>
-        )}
+      </div>
+    </div>
+  );
+}
+
+/** Üye olmayanlara: izleme listesi yalnızca üyelere açık */
+function SignInPrompt() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold tracking-tight">İzleme Listesi</h1>
+      <div className="card mx-auto max-w-lg p-8 text-center">
+        <div className="text-3xl text-amber-500">☆</div>
+        <h2 className="mt-2 text-lg font-semibold">İzleme listesi üyelere özel</h2>
+        <p className="mt-2 text-sm text-muted">
+          Ücretsiz üye ol; takip ettiğin şirketleri tek yerde gör, KAP&apos;ta bildirim yayınladıklarında site kapalıyken
+          de haberin olsun. Listen tüm cihazlarında aynı kalır.
+        </p>
+        <div className="mt-5 flex justify-center gap-2">
+          <Link href="/giris?kayit=1&next=/izleme-listesi" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+            Üye ol
+          </Link>
+          <Link href="/giris?next=/izleme-listesi" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-surface-2">
+            Giriş yap
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -116,7 +132,7 @@ function NotificationToggle() {
 }
 
 export default function Watchlist({ companies }: { companies: CompanySummary[] }) {
-  const { list, remove } = useWatchlist();
+  const { list, remove, signedIn } = useWatchlist();
   const watched = useMemo(() => companies.filter((c) => list.includes(c.code)), [companies, list]);
   const [days, setDays] = useState(7);
 
@@ -128,6 +144,9 @@ export default function Watchlist({ companies }: { companies: CompanySummary[] }
       .then((items) => markRead(items.map((d) => d.id)))
       .catch(() => {});
   }, [key]);
+
+  if (signedIn === undefined) return null;
+  if (!signedIn) return <SignInPrompt />;
 
   return (
     <div className="space-y-6">
