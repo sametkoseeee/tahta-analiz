@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { changeClass, num, signedPct } from "@/lib/format";
+import { changeClass, fundPrice, num, signedPct } from "@/lib/format";
 import { useLive } from "@/lib/live";
 import type { PricePoint } from "@/lib/types";
 
@@ -18,17 +18,29 @@ const RANGES = [
 const monthFmt = new Intl.DateTimeFormat("tr-TR", { month: "short", year: "2-digit" });
 const dayFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric" });
 
-export default function PriceChart({ code, prices: base }: { code: string; prices: PricePoint[] }) {
+export default function PriceChart({
+  code,
+  prices: base,
+  live = true,
+  label = "Kapanış",
+}: {
+  code: string;
+  prices: Pick<PricePoint, "d" | "c">[];
+  /** Hisseler için seans içi fiyatı ekler; fonlarda kapalı */
+  live?: boolean;
+  label?: string;
+}) {
   const [range, setRange] = useState("1Y");
   const days = RANGES.find((r) => r.label === range)!.days;
-  const q = useLive().quotes[code];
+  const quote = useLive().quotes[code];
+  const q = live ? quote : undefined;
   // Seans içi güncel fiyat: bugünün noktasını ekle ya da güncelle
   const prices = useMemo(() => {
     if (!q || base.length === 0) return base;
     const today = new Date(q.t).toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
     const last = base[base.length - 1];
     if (last.d === today) return [...base.slice(0, -1), { ...last, c: q.p }];
-    return last.d < today ? [...base, { d: today, c: q.p, v: 0 }] : base;
+    return last.d < today ? [...base, { d: today, c: q.p }] : base;
   }, [base, q]);
   const data = useMemo(() => (days === Infinity ? prices : prices.slice(-days)), [prices, days]);
 
@@ -88,7 +100,7 @@ export default function PriceChart({ code, prices: base }: { code: string; price
             <Tooltip
               contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
               labelFormatter={(d) => dayFmt.format(new Date(String(d)))}
-              formatter={(v) => [`${num(Number(v))} ₺`, "Kapanış"]}
+              formatter={(v) => [`${fundPrice(Number(v))} ₺`, label]}
             />
             <Area type="monotone" dataKey="c" stroke={color} strokeWidth={1.75} fill="url(#pfill)" isAnimationActive={false} />
           </AreaChart>

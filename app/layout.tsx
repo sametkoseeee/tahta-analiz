@@ -46,6 +46,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   </Link>
                   <Link href="/radar" className="rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
                     Hisse Radar
+                  </Link>
+                  <Link href="/fonlar" className="rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
+                    Fonlar
                   </Link>                  <Link
                     href="/izleme-listesi"
                     className="hidden rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text md:block"

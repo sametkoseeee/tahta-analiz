@@ -79,5 +79,36 @@ export type CompanyDetail = {
   statements: { quarterly: StatementSet; annual: StatementSet };
 };
 
+/** TEFAS yatırım fonu özeti (scripts/fetch_funds.py). Getiriler oran: 0.03 = %3 */
+export type FundSummary = {
+  code: string;
+  name: string;
+  /** Şemsiye fon türü, ör. "Hisse Senedi Şemsiye Fonu" */
+  umbrella: string | null;
+  category: string | null;
+  founder: string | null;
+  /** 1 (düşük) – 7 (yüksek) */
+  risk: number | null;
+  price: number | null;
+  priceDate: string | null;
+  change: number | null;
+  r1m: number | null;
+  r3m: number | null;
+  r6m: number | null;
+  rytd: number | null;
+  r1y: number | null;
+  r3y: number | null;
+  r5y: number | null;
+  size: number | null;
+  sizeChange1m: number | null;
+  investors: number | null;
+  marketShare: number | null;
+  categoryRank: number | null;
+  categoryCount: number | null;
+  spark: number[];
+};
+
+export type FundDetail = Omit<FundSummary, "spark"> & { prices: { d: string; c: number }[] };
+
 /** Mali tablo bileşenlerine giden kısım (fiyat geçmişi olmadan) */
 export type Financials = Pick<CompanyDetail, "code" | "financialCurrency" | "statements">;

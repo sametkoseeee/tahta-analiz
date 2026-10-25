@@ -39,6 +39,12 @@ jobs:
         # Kod gönderiminde, önbellekte veri varsa yeniden çekme (hızlı yayın)
         if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
         run: python -u scripts/fetch_data.py --refresh-list
+      - name: Fonları çek (TEFAS)
+        # TEFAS'a ulaşılamazsa yayın durmasın; önceki günün fon verisi önbellekte kalır
+        if: github.event_name != 'push' || hashFiles('data/funds.json') == ''
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python -u scripts/fetch_funds.py
 
       # Sonraki adımlar (Vercel) hata verse de çekilen veri saklansın; uzun ilk çekim boşa gitmesin
       - uses: actions/cache/save@v4

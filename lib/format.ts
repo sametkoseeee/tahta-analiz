@@ -5,9 +5,20 @@ const n0 = nf(0);
 const n1 = nf(1);
 const n2 = nf(2);
 
+const extra = new Map<number, Intl.NumberFormat>();
+
 export function num(v: number | null | undefined, digits = 2): string {
   if (v == null || !isFinite(v)) return "–";
-  return (digits === 0 ? n0 : digits === 1 ? n1 : n2).format(v);
+  if (digits <= 2) return (digits === 0 ? n0 : digits === 1 ? n1 : n2).format(v);
+  // Fon fiyatları gibi küçük değerler için (ör. 1,319796)
+  if (!extra.has(digits)) extra.set(digits, nf(digits));
+  return extra.get(digits)!.format(v);
+}
+
+/** Fon fiyatı: 1 TL altı 6, 10 TL altı 4 basamak */
+export function fundPrice(v: number | null | undefined): string {
+  if (v == null) return "–";
+  return num(v, v < 1 ? 6 : v < 10 ? 4 : 2);
 }
 
 export function pct(v: number | null | undefined, digits = 1): string {
