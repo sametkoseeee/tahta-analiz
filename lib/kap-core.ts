@@ -95,6 +95,7 @@ async function fetchOnce(days: number, oids: string[]): Promise<Disclosure[]> {
     signal: AbortSignal.timeout(40_000),
     cache: "no-store",
   });
+  if (res.status === 429) throw new Error("KAP çok sık istek nedeniyle geçici olarak yanıt vermiyor");
   if (!res.ok) throw new Error(`KAP ${res.status}`);
   const raw = (await res.json()) as RawDisclosure[];
   return raw.map(toDisclosure).sort((a, b) => b.id - a.id);

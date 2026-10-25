@@ -79,5 +79,32 @@ export type CompanyDetail = {
   statements: { quarterly: StatementSet; annual: StatementSet };
 };
 
+/** KAP sermaye artırımı/azaltımı bildirimlerinden derlenen bir işlem (scripts/sermaye_artirim.py) */
+export type CapitalAction = {
+  code: string;
+  /** Şirket listemizde (sayfası var) mı */
+  listed: boolean;
+  company: string;
+  status: "YK kararı" | "SPK başvurusu" | "SPK onayı" | "Hak kullanımı" | "Tamamlandı" | "İptal";
+  ykKarar: string | null;
+  kayitliTavan?: number;
+  mevcut: number | null;
+  ulasilacak: number | null;
+  /** Oranlar yüzde cinsinden: 40 = %40 */
+  bedelliOran?: number;
+  tahsisliOran?: number;
+  bedelsizOran?: number;
+  azaltimOran?: number;
+  ruchanFiyat?: number;
+  ruchanBaslangic?: string;
+  ruchanBitis?: string;
+  bedelsizBaslangic?: string;
+  tahsisliTarih?: string;
+  spkBasvuru?: string;
+  spkOnay?: string;
+  lastDate: string;
+  disclosures: { id: number; date: string; summary: string }[];
+};
+
 /** Mali tablo bileşenlerine giden kısım (fiyat geçmişi olmadan) */
 export type Financials = Pick<CompanyDetail, "code" | "financialCurrency" | "statements">;

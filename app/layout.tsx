@@ -48,6 +48,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     Hisse Radar
                   </Link>
                   <Link
+                    href="/sermaye-artirimlari"
+                    className="rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text"
+                  >
+                    <span className="lg:hidden">Sermaye</span>
+                    <span className="hidden lg:inline">Sermaye Artırımları</span>
+                  </Link>
+                  <Link
                     href="/izleme-listesi"
                     className="hidden rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text md:block"
                   >

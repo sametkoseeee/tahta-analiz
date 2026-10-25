@@ -23,6 +23,9 @@ export async function GET(req: NextRequest) {
     const items = (await getDisclosuresFor(codes, days)).slice(0, limit);
     return NextResponse.json({ items });
   } catch (e) {
-    return NextResponse.json({ items: [], error: `KAP'a ulaşılamadı: ${(e as Error).message}` }, { status: 502 });
+    const m = (e as Error).message;
+    // Node'un ham ağ hatası ("fetch failed", zaman aşımı) kullanıcıya Türkçe gösterilir
+    const reason = /fetch failed|timeout|aborted/i.test(m) ? "bağlantı kurulamadı, biraz sonra tekrar deneyin" : m;
+    return NextResponse.json({ items: [], error: `KAP'a ulaşılamadı: ${reason}` }, { status: 502 });
   }
 }
