@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import AuthForm from "@/components/AuthForm";
 import { supabaseEnabled } from "@/lib/supabase/config";
 
-export const metadata: Metadata = { title: "Giriş | Borsa Analiz" };
+export const metadata: Metadata = { title: "Giriş" };
 
 export default function LoginPage() {
   if (!supabaseEnabled) {

@@ -4,7 +4,7 @@ export type Sheet = { name: string; rows: (string | number | null)[][] };
 export async function downloadXlsx(filename: string, sheets: Sheet[]) {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Borsa Analiz";
+  wb.creator = "Hisse Analiz";
 
   for (const s of sheets) {
     const ws = wb.addWorksheet(s.name.slice(0, 31));

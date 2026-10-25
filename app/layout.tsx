@@ -11,8 +11,10 @@ import "./globals.css";
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
-  title: "Borsa Analiz",
-  description: "BIST şirketlerinin mali tabloları, oranları ve hisse tarama aracı",
+  title: { default: "Hisse Analiz", template: "%s | Hisse Analiz" },
+  description: "BIST şirketlerinin mali tabloları, oranları, KAP bildirimleri ve hisse tarama aracı",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100"),
+  icons: { icon: "/icon.png", apple: "/icon.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -25,8 +27,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-white">B</span>
-              <span className="hidden sm:inline">Borsa Analiz</span>
+              <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-white">H</span>
+              <span className="hidden sm:inline">Hisse Analiz</span>
             </Link>
             <nav className="flex items-center gap-1 text-sm">
               <Link href="/" className="rounded-md px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text">

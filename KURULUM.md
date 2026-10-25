@@ -1,4 +1,4 @@
-# Yayına alma rehberi (GitHub + Supabase + Vercel)
+﻿# Yayına alma rehberi (GitHub + Supabase + Vercel)
 
 Toplam ~30 dakika. Üç ücretsiz hesap gerekiyor. Anahtarları **kimseyle paylaşma**; yalnızca aşağıda söylenen yerlere yapıştır.
 
@@ -12,11 +12,11 @@ Bitince:
 ## 1. GitHub — kodu yükle
 
 1. <https://github.com> üzerinden hesap aç (varsa giriş yap).
-2. Sağ üstte **+ → New repository**: ad `borsa-analiz`, **Private** seç, başka hiçbir kutuyu işaretleme → **Create repository**.
+2. Sağ üstte **+ → New repository**: ad `hisse-analiz`, **Private** seç, başka hiçbir kutuyu işaretleme → **Create repository**.
 3. Bilgisayarında proje klasöründe şunları çalıştır (`KULLANICI_ADIN` yerine GitHub kullanıcı adını yaz):
 
    ```bash
-   git remote add origin https://github.com/KULLANICI_ADIN/borsa-analiz.git
+   git remote add origin https://github.com/KULLANICI_ADIN/hisse-analiz.git
    git push -u origin master
    ```
 
@@ -25,7 +25,7 @@ Bitince:
 ## 2. Supabase — üyelik ve veritabanı
 
 1. <https://supabase.com> → **Start your project** (GitHub hesabınla girebilirsin).
-2. **New project**: ad `borsa-analiz`, güçlü bir veritabanı şifresi belirle (bir yere not et), bölge **Central EU (Frankfurt)** → **Create**.
+2. **New project**: ad `hisse-analiz`, güçlü bir veritabanı şifresi belirle (bir yere not et), bölge **Central EU (Frankfurt)** → **Create**.
 3. Proje hazır olunca soldan **SQL Editor → New query**: bu repodaki `supabase/schema.sql` dosyasının tamamını yapıştır → **Run**. "Success" görmelisin.
 4. Soldan **Project Settings → API**. Şu üç değeri not et:
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
@@ -38,7 +38,7 @@ Bitince:
 ## 3. Vercel — site barındırma
 
 1. <https://vercel.com> → **Sign up → Continue with GitHub**.
-2. **Add New… → Project** → `borsa-analiz` reposunu **Import** et. Framework otomatik "Next.js" seçilir.
+2. **Add New… → Project** → `hisse-analiz` reposunu **Import** et (proje adı `hisse-analiz` kalırsa adres `hisse-analiz.vercel.app` olur). Framework otomatik "Next.js" seçilir.
 3. **Environment Variables** bölümüne şunları ekle (değerler: Supabase'ten aldıkların ve bilgisayarındaki `.env.local` dosyasındaki VAPID satırları):
 
    | Ad | Değer |
@@ -77,6 +77,18 @@ GitHub'da repo → **Settings → Secrets and variables → Actions → New repo
 1. Sitede **Giriş → Hesap oluştur**, e-postandaki bağlantıya tıkla.
 2. Birkaç şirketi ☆ ile izle → **İzleme Listesi → Anlık bildirimler**'i aç, tarayıcı izin isterse **İzin ver**.
 3. Telefonda da aynı hesapla girip bildirimleri açabilirsin. iPhone'da Web Push için siteyi Safari'de **Paylaş → Ana Ekrana Ekle** ile ekleyip oradan açman gerekir (iOS 16.4+).
+
+## 7. Kendi alan adın (isteğe bağlı)
+
+`hisseanaliz.com` ve `hisseanaliz.com.tr` başkalarına kayıtlı (Ekim 2026). Boş olanlar arasında `hisse-analiz.com` ve `hisseanaliz.io` vardı; satın almadan önce tekrar kontrol et.
+
+1. Alan adını bir kayıt firmasından (ör. Cloudflare, Namecheap, İsimtescil) satın al.
+2. Vercel'de proje → **Settings → Domains → Add**: `hisse-analiz.com` yaz, `www` yönlendirmesini de eklemeyi kabul et.
+3. Vercel'in gösterdiği DNS kayıtlarını alan adı firmasının panelinde ekle (genelde kök alan adı için `A 76.76.21.21`, `www` için `CNAME cname.vercel-dns.com`). Birkaç dakika–birkaç saat içinde aktif olur; HTTPS sertifikası otomatik gelir.
+4. Adresi değiştirdikten sonra şunları yeni adresle güncelle:
+   - Vercel ve GitHub Secrets'taki `NEXT_PUBLIC_SITE_URL` → `https://hisse-analiz.com`
+   - Supabase **Authentication → URL Configuration**: Site URL ve Redirect URL (`https://hisse-analiz.com/auth/callback`)
+   - Sonra GitHub Actions'ta **Veri güncelle ve yayınla**'yı bir kez elle çalıştır.
 
 ## Yerelde üyelikle çalıştırmak
 

@@ -20,7 +20,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kod } = await params;
   const c = getCompany(kod);
-  return { title: c ? `${c.code} · ${c.name} | Borsa Analiz` : "Bulunamadı" };
+  return { title: c ? `${c.code} · ${c.name}` : "Bulunamadı" };
 }
 
 const GROUPS: { title: string; keys: MetricKey[] }[] = [

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Radar from "@/components/Radar";
 import { getIndex } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Hisse Radar | Borsa Analiz" };
+export const metadata: Metadata = { title: "Hisse Radar" };
 
 export default function RadarPage() {
   const { companies } = getIndex();
