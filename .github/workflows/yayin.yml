@@ -17,7 +17,7 @@ concurrency:
 jobs:
   yayinla:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -40,6 +40,9 @@ jobs:
         if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
         run: python -u scripts/fetch_data.py --refresh-list
       - name: Sermaye artırımlarını güncelle
+        # KAP engellerse yayın durmasın; eksik kalan günler bir sonraki çalıştırmada taranır
+        continue-on-error: true
+        timeout-minutes: 50
         run: python -u scripts/sermaye_artirim.py
 
       - uses: actions/setup-node@v4
