@@ -29,22 +29,42 @@ export default function NewsList({
     error: null,
   });
 
+  const [attempt, setAttempt] = useState(0);
+
   useEffect(() => {
     const ctrl = new AbortController();
     const list = key ? key.split(",") : [];
     fetchNews(list, days, ctrl.signal)
       .then((items) => setState({ key, items, error: null }))
       .catch((e: Error) => {
-        if (e.name !== "AbortError") setState({ key, items: [], error: e.message });
+        if (e.name === "AbortError") return;
+        // Tarayıcının ağ hatası ("Failed to fetch") kullanıcıya Türkçe gösterilir
+        const network = e instanceof TypeError;
+        setState({ key, items: [], error: network ? "Sunucuya ulaşılamadı." : e.message });
       });
     return () => ctrl.abort();
-  }, [key, days]);
+  }, [key, days, attempt]);
 
   if (codes.length === 0) return null;
   if (state.key !== key || state.items === null) {
     return <p className="p-4 text-sm text-muted">KAP bildirimleri yükleniyor…</p>;
   }
-  if (state.error) return <p className="p-4 text-sm text-down">{state.error}</p>;
+  if (state.error) {
+    return (
+      <div className="flex flex-wrap items-center gap-3 p-4 text-sm">
+        <span className="text-down">KAP bildirimleri yüklenemedi: {state.error}</span>
+        <button
+          onClick={() => {
+            setState((s) => ({ ...s, items: null }));
+            setAttempt((a) => a + 1);
+          }}
+          className="rounded-md border border-border px-2.5 py-1 text-xs hover:bg-surface-2"
+        >
+          Tekrar dene
+        </button>
+      </div>
+    );
+  }
   if (state.items.length === 0) return <p className="p-4 text-sm text-muted">{empty}</p>;
 
   return (

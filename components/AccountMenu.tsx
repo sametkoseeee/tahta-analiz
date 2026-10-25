@@ -6,13 +6,18 @@ import { supabaseEnabled } from "@/lib/supabase/config";
 
 export default function AccountMenu() {
   const user = useUser();
-  if (!supabaseEnabled || user === undefined) return null;
+  if (supabaseEnabled && user === undefined) return null;
 
   if (!user) {
     return (
-      <Link href="/giris" className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
-        Giriş
-      </Link>
+      <div className="flex shrink-0 items-center gap-1">
+        <Link href="/giris" className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted hover:bg-surface-2 hover:text-text">
+          Giriş
+        </Link>
+        <Link href="/giris?kayit=1" className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
+          Üye ol
+        </Link>
+      </div>
     );
   }
   const initial = (user.email ?? "?")[0].toUpperCase();

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authErrorMessage } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase/client";
+import { supabaseEnabled } from "@/lib/supabase/config";
 
 type Mode = "login" | "signup" | "reset";
 
@@ -11,11 +12,14 @@ const TITLES: Record<Mode, string> = { login: "Giriş yap", signup: "Hesap oluş
 
 export default function AuthForm() {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("login");
+  const params = useSearchParams();
+  const [mode, setMode] = useState<Mode>(params.get("kayit") ? "signup" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    params.get("hata") ? "Bağlantının süresi dolmuş ya da geçersiz. Tekrar dene." : null,
+  );
   const [info, setInfo] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
@@ -58,6 +62,11 @@ export default function AuthForm() {
           ? "E-posta adresini yaz, sana şifre sıfırlama bağlantısı gönderelim."
           : "Hesabınla izleme listen tüm cihazlarında aynı olur ve bildirimler site kapalıyken de gelir."}
       </p>
+      {!supabaseEnabled && (
+        <p className="mt-4 rounded-md bg-accent-soft px-3 py-2 text-sm text-accent">
+          Üyelik sistemi henüz bağlanmadı. Supabase kurulumu yapılınca (KURULUM.md) kayıt ve giriş bu formdan çalışır.
+        </p>
+      )}
       <form onSubmit={submit} className="mt-5 space-y-3">
         <label className="block text-sm">
           <span className="mb-1 block text-muted">E-posta</span>
@@ -81,7 +90,7 @@ export default function AuthForm() {
         {info && <p className="rounded-md bg-up-soft px-3 py-2 text-sm text-up">{info}</p>}
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || !supabaseEnabled}
           className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
         >
           {busy ? "Bekle…" : mode === "login" ? "Giriş yap" : mode === "signup" ? "Kayıt ol" : "Bağlantı gönder"}

@@ -28,30 +28,35 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.variable} font-sans antialiased`}>
         <LiveProvider dataUpdatedAt={updatedAt}>
           <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur">
-            <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
-              <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+            {/* Telefonda iki satır: üstte logo + hesap, altta menü + arama; masaüstünde tek satır */}
+            <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 md:h-14 md:flex-nowrap md:py-0">
+              <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap font-semibold tracking-tight">
                 <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-white">H</span>
-                <span className="hidden sm:inline">Hisse Analiz</span>
+                <span>Hisse Analiz</span>
               </Link>
-              <nav className="flex items-center gap-1 text-sm">
-                <Link href="/" className="rounded-md px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
-                  Hisseler
-                </Link>
-                <Link href="/radar" className="rounded-md px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
-                  Hisse Radar
-                </Link>
-                <Link
-                  href="/izleme-listesi"
-                  className="hidden rounded-md px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text md:block"
-                >
-                  İzleme Listesi
-                </Link>
-              </nav>
-              <div className="ml-auto flex w-full max-w-xs items-center gap-2">
-                <Search items={items} />
+              <div className="ml-auto flex shrink-0 items-center gap-2 md:order-last md:ml-0">
                 <NewsBell />
                 <AccountMenu />
                 <WatchlistSync />
+              </div>
+              <div className="flex w-full min-w-0 items-center gap-2 md:w-auto md:flex-1">
+                <nav className="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm">
+                  <Link href="/" className="rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
+                    Hisseler
+                  </Link>
+                  <Link href="/radar" className="rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
+                    Hisse Radar
+                  </Link>
+                  <Link
+                    href="/izleme-listesi"
+                    className="hidden rounded-md px-2.5 py-1.5 text-muted hover:bg-surface-2 hover:text-text md:block"
+                  >
+                    İzleme Listesi
+                  </Link>
+                </nav>
+                <div className="min-w-0 flex-1 md:ml-auto md:max-w-xs">
+                  <Search items={items} />
+                </div>
               </div>
             </div>
           </header>
