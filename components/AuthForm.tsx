@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authErrorMessage } from "@/lib/auth";
@@ -102,6 +103,15 @@ export default function AuthForm() {
         >
           {busy ? "Bekle…" : mode === "login" ? "Giriş yap" : mode === "signup" ? "Kayıt ol" : "Bağlantı gönder"}
         </button>
+        {mode === "signup" && (
+          <p className="text-xs text-muted">
+            Kayıt olarak kişisel verilerinin{" "}
+            <Link href="/kvkk" target="_blank" className="text-accent hover:underline">
+              KVKK Aydınlatma Metni
+            </Link>
+            &apos;nde anlatıldığı şekilde işleneceğini okuduğunu kabul edersin.
+          </p>
+        )}
       </form>
       <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm">
         {mode === "login" ? (

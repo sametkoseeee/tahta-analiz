@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import FundsTable from "@/components/FundsTable";
 import { getFunds } from "@/lib/data";
 
@@ -13,7 +14,15 @@ export default function FundsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Yatırım Fonları</h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Yatırım Fonları</h1>
+          <Link
+            href="/fonlar/karsilastir"
+            className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
+          >
+            Fonları karşılaştır
+          </Link>
+        </div>
         <p className="mt-1 text-sm text-muted">
           TEFAS&apos;ta işlem gören {funds.length} fonun getirileri, büyüklükleri ve fiyat geçmişi.
           {lastDate && ` Fiyat tarihi: ${lastDate.split("-").reverse().join(".")}.`} Getiriler TEFAS kaynaklıdır, geçmiş getiri

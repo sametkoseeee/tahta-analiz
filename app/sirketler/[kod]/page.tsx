@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { KeyStats, LivePrice, RatioGroups } from "@/components/CompanyLive";
 import FinancialCharts from "@/components/FinancialCharts";
@@ -35,6 +36,12 @@ export default async function CompanyPage({ params }: Props) {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold tracking-tight">{c.code}</h1>
             <WatchButton code={c.code} />
+            <Link
+              href={`/karsilastir?kod=${c.code}`}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
+            >
+              Karşılaştır
+            </Link>
             <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{c.sector}</span>
           </div>
           {c.indices && c.indices.length > 0 && (

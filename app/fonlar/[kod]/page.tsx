@@ -61,6 +61,12 @@ export default async function FundPage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-3xl font-bold tracking-tight">{f.code}</h1>
             <WatchButton code={f.code} />
+            <Link
+              href={`/fonlar/karsilastir?kod=${f.code}`}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
+            >
+              Karşılaştır
+            </Link>
             {f.umbrella && (
               <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{f.umbrella}</span>
             )}

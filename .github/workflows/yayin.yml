@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install yfinance pandas requests
+      - run: pip install yfinance pandas requests beautifulsoup4
       - name: Veriyi çek
         # Kod gönderiminde, önbellekte veri varsa yeniden çekme (hızlı yayın)
         if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
@@ -50,6 +50,11 @@ jobs:
         continue-on-error: true
         timeout-minutes: 30
         run: python -u scripts/fetch_reports.py
+      - name: Temettü takvimini çek (KAP)
+        # İlk çalıştırmada tüm şirketlerin son bildirimi açılır (uzun); sonra yalnızca yeniler
+        continue-on-error: true
+        timeout-minutes: 75
+        run: python -u scripts/fetch_dividends.py
 
       # Sonraki adımlar (Vercel) hata verse de çekilen veri saklansın; uzun ilk çekim boşa gitmesin
       - uses: actions/cache/save@v4

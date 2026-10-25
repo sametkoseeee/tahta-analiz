@@ -55,7 +55,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
           <footer className="mx-auto max-w-7xl px-4 pb-10 pt-4 text-xs text-muted">
             Mali tablolar İş Yatırım, fiyatlar Yahoo Finance (yaklaşık 15 dakika gecikmeli), bildirimler KAP kaynaklıdır;
-            yatırım tavsiyesi değildir. <UpdatedAt dataUpdatedAt={updatedAt} />
+            yatırım tavsiyesi değildir. <UpdatedAt dataUpdatedAt={updatedAt} />{" "}
+            <Link href="/kvkk" className="underline hover:text-text">
+              KVKK Aydınlatma Metni
+            </Link>
           </footer>
         </LiveProvider>
       </body>

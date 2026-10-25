@@ -7,8 +7,10 @@ import { useEffect, useRef } from "react";
 const LINKS = [
   { href: "/", label: "Hisseler", match: (p: string) => p === "/" || p.startsWith("/sirketler") },
   { href: "/radar", label: "Hisse Radar" },
+  { href: "/karsilastir", label: "Karşılaştır" },
   { href: "/fonlar", label: "Fonlar" },
   { href: "/bilancolar", label: "Bilançolar" },
+  { href: "/temettu", label: "Temettü" },
   { href: "/izleme-listesi", label: "İzleme Listesi" },
 ];
 
