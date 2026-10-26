@@ -28,7 +28,7 @@ export default function NavLinks() {
   return (
     <nav
       ref={nav}
-      className="no-scrollbar -mx-4 flex items-center gap-1 overflow-x-auto whitespace-nowrap px-4 text-sm lg:mx-0 lg:overflow-visible lg:px-0"
+      className="no-scrollbar -mx-4 flex items-center gap-1 overflow-x-auto whitespace-nowrap px-4 text-sm lg:mx-0 lg:px-0"
     >
       {LINKS.map((l) => {
         const active = l.match ? l.match(path) : path === l.href || path.startsWith(`${l.href}/`);

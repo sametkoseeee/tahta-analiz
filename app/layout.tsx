@@ -39,22 +39,22 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <LiveProvider dataUpdatedAt={updatedAt}>
           {/* Telefonda üç satırlık başlık ekranı kaplamasın diye yalnızca geniş ekranda sabit */}
           <header className="z-30 border-b border-border bg-surface/90 backdrop-blur lg:sticky lg:top-0">
-            {/* Telefonda üç satır: logo + hesap, arama, kaydırılabilir menü; geniş ekranda tek satır */}
-            <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-1 pt-2 lg:h-14 lg:flex-nowrap lg:py-0">
+            {/* Telefonda üç satır: logo + hesap, arama, kaydırılabilir menü; geniş ekranda iki satır: logo + arama + hesap, menü */}
+            <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-1 pt-2">
               <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap font-semibold tracking-tight">
                 <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-white">T</span>
                 <span>Tahta Analiz</span>
               </Link>
-              <div className="ml-auto flex shrink-0 items-center gap-2 lg:order-last lg:ml-0">
+              <div className="ml-auto flex shrink-0 items-center gap-2 lg:order-2 lg:ml-0">
                 <ThemeToggle />
                 <NewsBell />
                 <AccountMenu />
                 <WatchlistSync />
               </div>
-              <div className="order-2 w-full lg:ml-auto lg:w-72 lg:shrink-0">
+              <div className="order-2 w-full lg:order-1 lg:ml-auto lg:w-72 lg:shrink-0">
                 <Search items={items} />
               </div>
-              <div className="order-3 w-full min-w-0 lg:order-1 lg:w-auto">
+              <div className="order-3 w-full min-w-0">
                 <NavLinks />
               </div>
             </div>
