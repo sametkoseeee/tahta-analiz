@@ -5,10 +5,12 @@ import AccountMenu from "@/components/AccountMenu";
 import NavLinks from "@/components/NavLinks";
 import NewsBell from "@/components/NewsBell";
 import Search from "@/components/Search";
+import ThemeToggle from "@/components/ThemeToggle";
 import UpdatedAt from "@/components/UpdatedAt";
 import WatchlistSync from "@/components/WatchlistSync";
 import { getFunds, getIndex } from "@/lib/data";
 import { LiveProvider } from "@/lib/live";
+import { THEME_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] });
@@ -28,7 +30,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   ];
 
   return (
-    <html lang="tr">
+    // data-theme sayfa açılırken betikle atanır; sunucu çıktısıyla farklı olması beklenir
+    <html lang="tr" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <LiveProvider dataUpdatedAt={updatedAt}>
           {/* Telefonda üç satırlık başlık ekranı kaplamasın diye yalnızca geniş ekranda sabit */}
@@ -40,6 +46,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <span>Tahta Analiz</span>
               </Link>
               <div className="ml-auto flex shrink-0 items-center gap-2 lg:order-last lg:ml-0">
+                <ThemeToggle />
                 <NewsBell />
                 <AccountMenu />
                 <WatchlistSync />
