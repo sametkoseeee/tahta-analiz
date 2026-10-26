@@ -76,9 +76,15 @@ export default function KvkkPage() {
       </div>
       <p className="mt-3">
         Üye olmadan siteyi gezen ziyaretçilerden yalnızca teknik olarak zorunlu işlem güvenliği verileri (ör. IP adresi)
-        sunucu kayıtlarında tutulur. Sitede reklam, pazarlama, ziyaretçi istatistiği veya takip amaçlı çerez kullanılmaz;
-        yalnızca giriş yapmış kalmanız için zorunlu oturum çerezi ve tarayıcınızda tutulan site tercihleri (ör. okunan
-        bildirimler) kullanılır.
+        sunucu kayıtlarında tutulur. Sitede reklam, pazarlama veya takip amaçlı çerez kullanılmaz; yalnızca giriş yapmış
+        kalmanız için zorunlu oturum çerezi ve tarayıcınızda tutulan site tercihleri (ör. okunan bildirimler, tema seçimi)
+        kullanılır.
+      </p>
+      <p className="mt-3">
+        Sitenin nasıl kullanıldığını görmek için Vercel Web Analytics ile <strong>çerezsiz ve anonim</strong> ziyaret
+        istatistiği tutulur: ziyaret edilen sayfa, sitenin hangi bağlantıdan açıldığı, ülke, cihaz ve tarayıcı türü.
+        Ziyaretçiyi tanımlayan bir bilgi (ad, e-posta, IP adresi) saklanmaz, çerez kullanılmaz ve ziyaretler başka
+        sitelerdeki hareketlerinizle birleştirilmez.
       </p>
 
       <h2 className={h2}>3. Hangi amaçlarla işliyoruz?</h2>
@@ -131,7 +137,7 @@ export default function KvkkPage() {
             </tr>
             <tr>
               <td>Vercel</td>
-              <td>Sitenin barındırılması ve sunulması</td>
+              <td>Sitenin barındırılması ve sunulması, anonim ziyaret istatistiği</td>
               <td>ABD ve dünya genelindeki sunucular</td>
             </tr>
             <tr>

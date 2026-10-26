@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import AccountMenu from "@/components/AccountMenu";
@@ -73,6 +74,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </Link>
           </footer>
         </LiveProvider>
+        {/* Çerezsiz, anonim ziyaret istatistiği (Vercel Web Analytics) */}
+        <Analytics />
       </body>
     </html>
   );

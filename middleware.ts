@@ -23,5 +23,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Statik dosyalar, görseller ve service worker hariç
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|_vercel|favicon.ico|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };
