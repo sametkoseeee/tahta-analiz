@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/bilancolar/yaklasan", 0.7),
     page("/temettu", 0.8),
     page("/viop", 0.7),
+    page("/tedbirli-hisseler", 0.7),
     page("/karsilastir", 0.6, "weekly"),
     page("/fonlar/karsilastir", 0.6, "weekly"),
     page("/kvkk", 0.2, "monthly"),

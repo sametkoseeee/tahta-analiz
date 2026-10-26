@@ -10,6 +10,7 @@ import WatchButton from "@/components/WatchButton";
 import { getCompany, getIndex } from "@/lib/data";
 import { num } from "@/lib/format";
 import { INDEX_NAMES } from "@/lib/indices";
+import { getActiveMeasure, MEASURE_LABELS } from "@/lib/measures";
 
 type Props = { params: Promise<{ kod: string }> };
 
@@ -28,6 +29,7 @@ export default async function CompanyPage({ params }: Props) {
   const c = getCompany(kod);
   if (!c) notFound();
   const m = c.metrics;
+  const measure = getActiveMeasure(c.code);
   const fin = { code: c.code, financialCurrency: c.financialCurrency, statements: c.statements };
   return (
     <div className="space-y-6">
@@ -57,6 +59,16 @@ export default async function CompanyPage({ params }: Props) {
         </div>
         <LivePrice code={c.code} metrics={m} />
       </section>
+
+      {measure && (
+        <Link
+          href="/tedbirli-hisseler"
+          className="block rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 hover:bg-amber-500/15 dark:text-amber-400"
+        >
+          <strong>⚠️ Tedbirli hisse:</strong> {measure.kinds.map((k) => MEASURE_LABELS[k]).join(", ") || "VBTS tedbiri"} (
+          {measure.end.split("-").reverse().join(".")} seans sonuna kadar).
+        </Link>
+      )}
 
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="card p-4 lg:col-span-2">

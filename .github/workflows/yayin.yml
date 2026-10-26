@@ -50,6 +50,11 @@ jobs:
         continue-on-error: true
         timeout-minutes: 10
         run: python -u scripts/fetch_viop.py
+      - name: Tedbirli hisseleri çek (KAP)
+        # Her yayında; birkaç istek. KAP engellerse önceki liste kalır
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python -u scripts/fetch_measures.py
       - name: Bilanço takvimini çek (KAP)
         # Her yayında (kod gönderiminde de) güncellenir; KAP engellerse yayın durmaz
         continue-on-error: true

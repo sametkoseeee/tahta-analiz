@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/bilancolar", label: "Bilançolar" },
   { href: "/temettu", label: "Temettü" },
   { href: "/viop", label: "VİOP" },
+  { href: "/tedbirli-hisseler", label: "Tedbirli" },
   { href: "/izleme-listesi", label: "İzleme Listesi" },
 ];
 
