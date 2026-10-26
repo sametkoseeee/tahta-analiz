@@ -16,8 +16,13 @@ import "./globals.css";
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
-  title: { default: "Tahta Analiz", template: "%s | Tahta Analiz" },
-  description: "BIST şirketlerinin mali tabloları, oranları, KAP bildirimleri, hisse tarama aracı ve TEFAS fonları",
+  title: {
+    default: "Tahta Analiz – BIST Hisse Analizi, Bilanço, Temettü ve Fonlar",
+    template: "%s | Tahta Analiz",
+  },
+  description:
+    "Tahta Analiz: BIST hisselerinin mali tabloları, F/K ve PD/DD oranları, bilanço ve temettü takvimi, KAP bildirimleri, hisse tarama, VİOP teminatları ve TEFAS fonları. Ücretsiz.",
+  openGraph: { siteName: "Tahta Analiz", locale: "tr_TR", type: "website" },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100"),
   icons: { icon: "/icon.png", apple: "/icon.png" },
 };
