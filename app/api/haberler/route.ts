@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
 
   try {
     const items = (await getDisclosuresFor(codes, days)).slice(0, limit);
-    return NextResponse.json({ items });
+    // Aynı istek 2 dakika boyunca Vercel'in önbelleğinden döner; işlev (CPU) yeniden çalışmaz
+    return NextResponse.json({ items }, { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } });
   } catch (e) {
     const m = (e as Error).message;
     // Node'un ham ağ hatası ("fetch failed", zaman aşımı) kullanıcıya Türkçe gösterilir

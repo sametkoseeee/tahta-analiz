@@ -2,7 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseEnabled } from "@/lib/supabase/config";
 
-/** Supabase oturum çerezini her istekte tazeler. Supabase ayarlı değilse hiçbir şey yapmaz. */
+/**
+ * Supabase oturum çerezini, sunucuda oturum okuyan adreslerde tazeler. Sayfalar statik; tarayıcıdaki
+ * Supabase istemcisi oturumu kendisi yeniler. Her sayfada çalışması Vercel işlem süresini (CPU) tüketiyordu.
+ */
 export async function middleware(request: NextRequest) {
   if (!supabaseEnabled) return NextResponse.next();
 
@@ -22,6 +25,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Statik dosyalar, görseller ve service worker hariç
-  matcher: ["/((?!_next/static|_next/image|_vercel|favicon.ico|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/api/push", "/auth/:path*"],
 };

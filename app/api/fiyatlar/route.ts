@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseEnabled } from "@/lib/supabase/config";
 import type { LiveQuote } from "@/lib/live";
 
-// Sonuç 60 saniye önbellekte tutulur; fiyatlar zaten 15 dakikada bir değişiyor
-export const revalidate = 60;
+// Sonuç 5 dakika önbellekte tutulur; fiyatlar seans içinde ~40 dakikada bir güncelleniyor
+export const revalidate = 300;
 
 /** GET /api/fiyatlar → { quotes: { THYAO: { p, c, t } } } */
 export async function GET() {
