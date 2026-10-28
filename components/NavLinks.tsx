@@ -15,6 +15,7 @@ const LINKS = [
   { href: "/tedbirli-hisseler", label: "Tedbirli" },
   { href: "/sermaye-artirimi", label: "Sermaye Artırımı" },
   { href: "/endeksler", label: "Endeksler" },
+  { href: "/hesaplama", label: "Hesaplama" },
   { href: "/izleme-listesi", label: "İzleme Listesi" },
 ];
 
