@@ -13,6 +13,8 @@ const LINKS = [
   { href: "/temettu", label: "Temettü" },
   { href: "/viop", label: "VİOP" },
   { href: "/tedbirli-hisseler", label: "Tedbirli" },
+  { href: "/sermaye-artirimi", label: "Sermaye Artırımı" },
+  { href: "/endeksler", label: "Endeksler" },
   { href: "/izleme-listesi", label: "İzleme Listesi" },
 ];
 

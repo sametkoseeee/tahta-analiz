@@ -11,6 +11,7 @@ import { getCompany, getIndex } from "@/lib/data";
 import { num } from "@/lib/format";
 import { INDEX_NAMES } from "@/lib/indices";
 import { getActiveMeasure, MEASURE_LABELS } from "@/lib/measures";
+import { capitalSummary, getOpenCapital } from "@/lib/capital";
 
 type Props = { params: Promise<{ kod: string }> };
 
@@ -30,6 +31,7 @@ export default async function CompanyPage({ params }: Props) {
   if (!c) notFound();
   const m = c.metrics;
   const measure = getActiveMeasure(c.code);
+  const capital = getOpenCapital(c.code);
   const fin = { code: c.code, financialCurrency: c.financialCurrency, statements: c.statements };
   return (
     <div className="space-y-6">
@@ -67,6 +69,20 @@ export default async function CompanyPage({ params }: Props) {
         >
           <strong>⚠️ Tedbirli hisse:</strong> {measure.kinds.map((k) => MEASURE_LABELS[k]).join(", ") || "VBTS tedbiri"} (
           {measure.end.split("-").reverse().join(".")} seans sonuna kadar).
+        </Link>
+      )}
+
+      {capital && (
+        <Link
+          href="/sermaye-artirimi"
+          className="block rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-sm text-accent hover:opacity-90"
+        >
+          <strong>Sermaye artırımı:</strong> {capitalSummary(capital)} · {capital.status}
+          {capital.rights?.start &&
+            ` · Rüçhan ${capital.rights.start.split("-").reverse().join(".")}${
+              capital.rights.end ? ` – ${capital.rights.end.split("-").reverse().join(".")}` : ""
+            }`}
+          {capital.bonus?.start && ` · Bedelsiz ${capital.bonus.start.split("-").reverse().join(".")}`}
         </Link>
       )}
 

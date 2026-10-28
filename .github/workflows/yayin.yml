@@ -55,6 +55,16 @@ jobs:
         continue-on-error: true
         timeout-minutes: 15
         run: python -u scripts/fetch_measures.py
+      - name: Endeksleri çek
+        # Yahoo'ya ulaşılamazsa önceki tablo kalır
+        continue-on-error: true
+        timeout-minutes: 10
+        run: python -u scripts/fetch_indices.py
+      - name: Sermaye artırımlarını çek (KAP)
+        # Çalıştırma başına en fazla 60 yeni bildirim açılır; ilk doldurma birkaç akşam sürer
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python -u scripts/fetch_capital.py
       - name: Bilanço takvimini çek (KAP)
         # Her yayında (kod gönderiminde de) güncellenir; KAP engellerse yayın durmaz
         continue-on-error: true
