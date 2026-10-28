@@ -37,7 +37,8 @@ export default async function CompanyPage({ params }: Props) {
     <div className="space-y-6">
       <section className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
+          {/* Telefonda uzun sektör adı ekrandan taşmasın: alt satıra iner */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h1 className="text-3xl font-bold tracking-tight">{c.code}</h1>
             <WatchButton code={c.code} />
             <Link
