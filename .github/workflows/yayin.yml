@@ -10,9 +10,11 @@ on:
     branches: [master]
   workflow_dispatch:
 
+# Çalışan iş iptal edilmez: gece güncellemesi sürerken kod gönderilirse yayın sırada bekler
+# (bekleyen birden fazla gönderimden yalnızca en yenisi çalışır)
 concurrency:
   group: yayin
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   yayinla:
@@ -45,33 +47,41 @@ jobs:
         continue-on-error: true
         timeout-minutes: 30
         run: python -u scripts/fetch_funds.py
+      # Aşağıdaki adımlar kod gönderiminde, önbellekte veri varsa atlanır: kaynaklara (özellikle KAP,
+      # sık istekte IP'yi engelliyor) günde bir kez, akşam çalıştırmasında gidilir
       - name: VİOP teminat tablosunu hazırla (Takasbank)
-        # Her yayında; Takasbank'a ulaşılamazsa önceki tablo kalır
+        # Takasbank'a ulaşılamazsa önceki tablo kalır
+        if: github.event_name != 'push' || hashFiles('data/viop.json') == ''
         continue-on-error: true
         timeout-minutes: 10
         run: python -u scripts/fetch_viop.py
       - name: Tedbirli hisseleri çek (KAP)
-        # Her yayında; birkaç istek. KAP engellerse önceki liste kalır
+        # KAP engellerse önceki liste kalır
+        if: github.event_name != 'push' || hashFiles('data/measures.json') == ''
         continue-on-error: true
         timeout-minutes: 15
         run: python -u scripts/fetch_measures.py
       - name: Endeksleri çek
         # Yahoo'ya ulaşılamazsa önceki tablo kalır
+        if: github.event_name != 'push' || hashFiles('data/indices.json') == ''
         continue-on-error: true
         timeout-minutes: 10
         run: python -u scripts/fetch_indices.py
       - name: Sermaye artırımlarını çek (KAP)
         # Çalıştırma başına en fazla 60 yeni bildirim açılır; ilk doldurma birkaç akşam sürer
+        if: github.event_name != 'push' || hashFiles('data/capital.json') == ''
         continue-on-error: true
         timeout-minutes: 20
         run: python -u scripts/fetch_capital.py
       - name: Bilanço takvimini çek (KAP)
-        # Her yayında (kod gönderiminde de) güncellenir; KAP engellerse yayın durmaz
+        # KAP engellerse yayın durmaz
+        if: github.event_name != 'push' || hashFiles('data/reports.json') == ''
         continue-on-error: true
         timeout-minutes: 30
         run: python -u scripts/fetch_reports.py
       - name: Temettü takvimini çek (KAP)
         # Her çalıştırmada en fazla 120 yeni bildirim açılır (~10 dk); eksikler sonraki günlerde tamamlanır
+        if: github.event_name != 'push' || hashFiles('data/dividends.json') == ''
         continue-on-error: true
         timeout-minutes: 20
         run: python -u scripts/fetch_dividends.py
