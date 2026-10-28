@@ -14,7 +14,7 @@ export type CalcPreset = {
 };
 
 /** "1.234,5" ya da "1234.5" → 1234.5 */
-function parse(s: string): number | null {
+export function parse(s: string): number | null {
   const t = s.trim();
   if (!t) return null;
   const v = Number(t.includes(",") ? t.replace(/\./g, "").replace(",", ".") : t);
@@ -73,7 +73,8 @@ export default function CapitalCalculator({ presets }: { presets: CalcPreset[] }
       </p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="grid grid-cols-2 gap-3">
+        {/* Etiketler farklı uzunlukta: kutular aynı hizada kalsın */}
+        <div className="grid grid-cols-2 items-end gap-3">
           <label className="col-span-2">
             <span className={label}>Hisse (isteğe bağlı, seçince oranlar dolar)</span>
             <select value={code} onChange={(e) => pick(e.target.value)} className={field}>
@@ -119,12 +120,12 @@ export default function CapitalCalculator({ presets }: { presets: CalcPreset[] }
             ].map(([k, v]) => (
               <div key={k} className="rounded-lg border border-border bg-surface p-3">
                 <div className="text-xs text-muted">{k}</div>
-                <div className="mt-1 text-lg font-semibold tabular">{v || "–"}</div>
+                <div className="mt-1 whitespace-nowrap text-base font-semibold tabular sm:text-lg">{v || "–"}</div>
               </div>
             ))}
             <div className="col-span-2 rounded-lg border border-border bg-surface p-3">
               <div className="text-xs text-muted">Artırım sonrası portföy değeri (teorik)</div>
-              <div className="mt-1 text-lg font-semibold tabular">{res ? `${fmt(res.value)} ₺` : "–"}</div>
+              <div className="mt-1 whitespace-nowrap text-base font-semibold tabular sm:text-lg">{res ? `${fmt(res.value)} ₺` : "–"}</div>
             </div>
           </div>
           <p className="mt-3 text-xs text-muted">
