@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import AccountMenu from "@/components/AccountMenu";
@@ -74,8 +73,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </Link>
           </footer>
         </LiveProvider>
-        {/* Çerezsiz, anonim ziyaret istatistiği (Vercel Web Analytics) */}
-        <Analytics />
+        {/* Çerezsiz, anonim ziyaret istatistiği (Cloudflare Web Analytics); anahtar yoksa eklenmez */}
+        {process.env.NEXT_PUBLIC_CF_BEACON && (
+          <script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: process.env.NEXT_PUBLIC_CF_BEACON })}
+          />
+        )}
       </body>
     </html>
   );

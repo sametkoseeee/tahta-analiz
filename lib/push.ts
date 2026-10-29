@@ -1,5 +1,7 @@
 "use client";
 
+import { getSupabase } from "./supabase/client";
+
 /** Web Push: site kapalıyken bile bildirim için tarayıcı aboneliği (giriş yapmış kullanıcılar) */
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
 const ACTIVE_KEY = "push-aktif";
@@ -63,15 +65,21 @@ export async function enablePush(): Promise<string | null> {
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
     }));
 
-  const res = await fetch("/api/push", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(sub.toJSON()),
+  // Site statik: abonelik doğrudan Supabase'e yazılır; RLS yalnızca kullanıcının kendi satırına izin verir
+  const supabase = getSupabase();
+  if (!supabase) return "Üyelik ayarlanmamış.";
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return "Önce giriş yapmalısın.";
+  const json = sub.toJSON();
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return "Geçersiz abonelik.";
+  const { error } = await supabase.from("push_subscriptions").upsert({
+    endpoint: json.endpoint,
+    user_id: data.user.id,
+    p256dh: json.keys.p256dh,
+    auth: json.keys.auth,
+    user_agent: navigator.userAgent.slice(0, 300),
   });
-  if (!res.ok) {
-    const { error } = (await res.json().catch(() => ({}))) as { error?: string };
-    return error ?? "Abonelik kaydedilemedi.";
-  }
+  if (error) return "Abonelik kaydedilemedi.";
   setActive(true);
   return null;
 }
@@ -79,11 +87,7 @@ export async function enablePush(): Promise<string | null> {
 export async function disablePush(): Promise<void> {
   const sub = await currentSubscription();
   if (sub) {
-    await fetch("/api/push", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ endpoint: sub.endpoint }),
-    }).catch(() => {});
+    await getSupabase()?.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
     await sub.unsubscribe();
   }
   setActive(false);

@@ -48,3 +48,6 @@ next-env.d.ts
 
 # python
 __pycache__/
+
+# Cloudflare wrangler yerel dosyaları
+.wrangler/

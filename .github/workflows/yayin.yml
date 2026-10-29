@@ -1,8 +1,8 @@
 name: Veri güncelle ve yayınla
 
-# Her iş günü akşamı (borsa kapanışından sonra) veriyi tazeler ve siteyi Vercel'e yayınlar.
-# Kod master'a gönderildiğinde de çalışır. data/ git'te olmadığı için Vercel kendi başına
-# build almaz (vercel.json); build burada alınıp hazır olarak yüklenir.
+# Her iş günü akşamı (borsa kapanışından sonra) veriyi tazeler ve siteyi Cloudflare Pages'e yayınlar.
+# Kod master'a gönderildiğinde de çalışır. Site statik olarak derlenir (out/); KAP bildirimleri için
+# functions/ altındaki Pages fonksiyonu da aynı yüklemeyle gider.
 on:
   schedule:
     - cron: "30 16 * * 1-5" # 19:30 TSİ
@@ -20,9 +20,6 @@ jobs:
   yayinla:
     runs-on: ubuntu-latest
     timeout-minutes: 180
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -98,6 +95,20 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: npx vercel@65.1.0 pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel@65.1.0 build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel@65.1.0 deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Siteyi derle (statik)
+        run: npx next build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_CF_BEACON: ${{ secrets.NEXT_PUBLIC_CF_BEACON }}
+      - name: Cloudflare Pages'e yükle
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Proje ilk yüklemede oluşturulur; varsa bu adım hata vermeden geçer
+          npx -y wrangler@4.150.0 pages project create tahta-analiz --production-branch master || true
+          npx -y wrangler@4.150.0 pages deploy out --project-name tahta-analiz --branch master --commit-dirty=true

@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getFunds, getIndex } from "@/lib/data";
 
+export const dynamic = "force-static";
+
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://tahtaanaliz.com";
 
 /** Google için site haritası: sabit sayfalar + tüm hisse ve fon sayfaları (/sitemap.xml) */

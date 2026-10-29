@@ -81,7 +81,7 @@ export default function KvkkPage() {
         kullanılır.
       </p>
       <p className="mt-3">
-        Sitenin nasıl kullanıldığını görmek için Vercel Web Analytics ile <strong>çerezsiz ve anonim</strong> ziyaret
+        Sitenin nasıl kullanıldığını görmek için Cloudflare Web Analytics ile <strong>çerezsiz ve anonim</strong> ziyaret
         istatistiği tutulur: ziyaret edilen sayfa, sitenin hangi bağlantıdan açıldığı, ülke, cihaz ve tarayıcı türü.
         Ziyaretçiyi tanımlayan bir bilgi (ad, e-posta, IP adresi) saklanmaz, çerez kullanılmaz ve ziyaretler başka
         sitelerdeki hareketlerinizle birleştirilmez.
@@ -136,8 +136,8 @@ export default function KvkkPage() {
               <td>Avrupa</td>
             </tr>
             <tr>
-              <td>Vercel</td>
-              <td>Sitenin barındırılması ve sunulması, anonim ziyaret istatistiği</td>
+              <td>Cloudflare</td>
+              <td>Sitenin barındırılması ve sunulması, alan adı (DNS), anonim ziyaret istatistiği</td>
               <td>ABD ve dünya genelindeki sunucular</td>
             </tr>
             <tr>
