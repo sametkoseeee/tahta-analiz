@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getSupabase } from "./supabase/client";
 import type { Metrics } from "./types";
 
 /** Seans içi güncel fiyat: p = fiyat, c = günlük değişim, t = güncelleme zamanı (ISO) */
@@ -12,21 +11,17 @@ type LiveState = { quotes: Record<string, LiveQuote>; updatedAt: string | null }
 const LiveContext = createContext<LiveState>({ quotes: {}, updatedAt: null });
 const REFRESH_MS = 5 * 60_000;
 
-/**
- * /api/fiyatlar'dan güncel fiyatları alır (5 dakikada bir). Yalnızca site verisinden
- * (build) daha yeni fiyatlar kullanılır; Supabase ayarlı değilse hiçbir şey değişmez.
- */
-/** Seans içi fiyatlar doğrudan Supabase'den (prices tablosu herkese açık okunur; site statik, sunucu yok) */
+/** Seans içi fiyatlar: Cloudflare fonksiyonu (functions/api/fiyatlar.ts) Supabase'i 5 dakika önbellekleyerek verir */
 async function fetchQuotes(): Promise<Record<string, LiveQuote> | null> {
-  const supabase = getSupabase();
-  if (!supabase) return null;
-  const { data, error } = await supabase.from("prices").select("code, price, change, updated_at").limit(2000);
-  if (error || !data) return null;
-  const quotes: Record<string, LiveQuote> = {};
-  for (const r of data) quotes[r.code] = { p: Number(r.price), c: r.change == null ? null : Number(r.change), t: r.updated_at };
-  return quotes;
+  const res = await fetch("/api/fiyatlar");
+  if (!res.ok) return null;
+  return ((await res.json()) as { quotes: Record<string, LiveQuote> }).quotes;
 }
 
+/**
+ * /api/fiyatlar'dan güncel fiyatları alır (5 dakikada bir). Yalnızca site verisinden
+ * (build) daha yeni fiyatlar kullanılır; fiyat yoksa hiçbir şey değişmez.
+ */
 export function LiveProvider({ dataUpdatedAt, children }: { dataUpdatedAt: string; children: React.ReactNode }) {
   const [state, setState] = useState<LiveState>({ quotes: {}, updatedAt: null });
 

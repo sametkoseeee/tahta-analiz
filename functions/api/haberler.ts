@@ -5,11 +5,14 @@
  * aynı istek KAP'a tekrar gitmez.
  */
 import kapOids from "../../data/kap_oids.json";
+import tickers from "../../data/tickers.json";
 import { stockCodes } from "../../lib/codes";
 import { fetchKapDisclosures } from "../../lib/kap-core";
 import type { Disclosure } from "../../lib/news";
 
 const OIDS = kapOids as Record<string, string>;
+/** Yalnızca borsada işlem gören kodlar kabul edilir: rastgele kodlarla KAP'a sorgu yağdırılamasın */
+const KNOWN = new Set(tickers as string[]);
 /** KAP kimliği bilinmeyen şirketler için tüm bildirimler çekilip süzülür; 2000 sınırı yüzünden kısa tutulur */
 const UNFILTERED_MAX_DAYS = 2;
 const CACHE_SECONDS = 120;
@@ -51,7 +54,7 @@ export const onRequestGet = async ({ request, waitUntil }: Context) => {
       (url.searchParams.get("codes") ?? "")
         .split(",")
         .map((c) => c.trim().toUpperCase())
-        .filter((c) => /^[A-Z0-9]{2,8}$/.test(c)),
+        .filter((c) => KNOWN.has(c)),
     ),
   ]
     .sort()
