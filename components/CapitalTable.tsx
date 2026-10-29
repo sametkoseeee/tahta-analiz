@@ -28,6 +28,12 @@ const STATUS_STYLE: Record<CapitalStatus, string> = {
 const date = (d: string | null | undefined) => (d ? d.split("-").reverse().join(".") : null);
 const pctText = (v: number | null | undefined) => (v ? `%${num(v, v % 1 ? 2 : 0)}` : "–");
 
+/** Arama için: şirket adları KAP'ta Türkçe karaktersiz de yazılabiliyor ("Sekerbank"), harfler eşitlenir */
+const norm = (s: string) =>
+  s
+    .toLocaleUpperCase("tr")
+    .replace(/[ŞĞÜÖÇİ]/g, (c) => ({ Ş: "S", Ğ: "G", Ü: "U", Ö: "O", Ç: "C", İ: "I" })[c]!);
+
 function tab(d: CapitalIncrease): Tab {
   if (d.status === "İptal") return "cancelled";
   return d.status === "Tamamlandı" ? "done" : "open";
@@ -45,27 +51,47 @@ function dates(d: CapitalIncrease): string {
 
 export default function CapitalTable({ items }: { items: CapitalIncrease[] }) {
   const [active, setActive] = useState<Tab>("open");
+  const [query, setQuery] = useState("");
+  const q = norm(query.trim());
+  // Arama yapılınca hisse hangi sekmede olursa olsun gösterilir
+  const matches = useMemo(
+    () => (q ? items.filter((d) => norm(d.code).includes(q) || norm(d.name).includes(q)) : items),
+    [items, q],
+  );
   const counts = useMemo(() => {
     const c = { open: 0, done: 0, cancelled: 0 };
-    items.forEach((d) => c[tab(d)]++);
+    matches.forEach((d) => c[tab(d)]++);
     return c;
-  }, [items]);
-  const list = items.filter((d) => tab(d) === active);
+  }, [matches]);
+  const list = q ? matches : items.filter((d) => tab(d) === active);
 
   return (
     <div className="space-y-3">
-      <div className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActive(t.key)}
-            className={`shrink-0 rounded-md px-3 py-1.5 text-sm ${
-              active === t.key ? "bg-accent text-white" : "text-muted hover:bg-surface-2 hover:text-text"
-            }`}
-          >
-            {t.label} <span className="opacity-70">({counts[t.key]})</span>
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Hisse ara (ör. SKBNK)"
+          aria-label="Sermaye artırımı tablosunda hisse ara"
+          className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-accent sm:w-64"
+        />
+        <div className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => {
+                setActive(t.key);
+                setQuery("");
+              }}
+              className={`shrink-0 rounded-md px-3 py-1.5 text-sm ${
+                !q && active === t.key ? "bg-accent text-white" : "text-muted hover:bg-surface-2 hover:text-text"
+              }`}
+            >
+              {t.label} <span className="opacity-70">({counts[t.key]})</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="card overflow-x-auto">
@@ -126,7 +152,7 @@ export default function CapitalTable({ items }: { items: CapitalIncrease[] }) {
             {list.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-3 py-10 text-center text-muted">
-                  Bu listede şirket yok.
+                  {q ? `“${query.trim()}” son 12 ayda sermaye artırımı bildirmemiş.` : "Bu listede şirket yok."}
                 </td>
               </tr>
             )}
