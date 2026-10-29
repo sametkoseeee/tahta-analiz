@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { changeClass, compact, num, periodLabel, signedPct } from "@/lib/format";
 import { useLiveCompanies } from "@/lib/live";
+import { matchesQuery, norm } from "@/lib/search";
 import type { RecentReport } from "@/lib/reports";
 import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
 import WatchButton from "./WatchButton";
@@ -27,8 +28,11 @@ export default function RecentReportsTable({ reports }: { reports: RecentReport[
   const [page, setPage] = useState(0);
   const live = useLiveCompanies(reports);
 
+  const [query, setQuery] = useState("");
+  const q = norm(query.trim());
+
   const list = useMemo(() => {
-    const rows = live.filter((r) => period === "all" || r.period === period);
+    const rows = live.filter((r) => (period === "all" || r.period === period) && (!q || matchesQuery(r, q)));
     return rows.sort((a, b) => {
       const va = value(a, sort.key);
       const vb = value(b, sort.key);
@@ -37,7 +41,7 @@ export default function RecentReportsTable({ reports }: { reports: RecentReport[
       if (vb == null) return -1;
       return (typeof va === "string" ? va.localeCompare(String(vb), "tr") : va - (vb as number)) * sort.dir;
     });
-  }, [live, period, sort]);
+  }, [live, period, sort, q]);
 
   const pageCount = Math.max(1, Math.ceil(list.length / PAGE));
   const current = Math.min(page, pageCount - 1);
@@ -81,6 +85,17 @@ export default function RecentReportsTable({ reports }: { reports: RecentReport[
             </option>
           ))}
         </select>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setPage(0);
+          }}
+          placeholder="Hisse ara (ör. THYAO)"
+          aria-label="Bilançolarda hisse ara"
+          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-accent sm:ml-auto sm:w-64"
+        />
       </div>
 
       <div className="card">
@@ -146,7 +161,7 @@ export default function RecentReportsTable({ reports }: { reports: RecentReport[
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="px-3 py-10 text-center text-muted">
-                    Bu dönemde açıklanan bilanço yok.
+                    {q ? `“${query.trim()}” için bu dönemde açıklanan bilanço yok.` : "Bu dönemde açıklanan bilanço yok."}
                   </td>
                 </tr>
               )}

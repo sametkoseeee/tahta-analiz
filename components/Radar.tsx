@@ -5,6 +5,7 @@ import { downloadXlsx } from "@/lib/excel";
 import { filterByIndex, INDEX_NAMES, type IndexFilter } from "@/lib/indices";
 import { useLiveCompanies } from "@/lib/live";
 import { inputScale, inputUnit, METRIC_MAP, METRICS } from "@/lib/metrics";
+import { matchesQuery, norm } from "@/lib/search";
 import type { CompanySummary, MetricKey } from "@/lib/types";
 import CompaniesTable, { sortCompanies, type SortState } from "./CompaniesTable";
 
@@ -58,6 +59,11 @@ export default function Radar({ companies }: { companies: CompanySummary[] }) {
       });
     });
   }, [pool, filters, chosenSectors]);
+
+  // Arama, kriterlere uyan sonuçlar içinde yapılır
+  const [query, setQuery] = useState("");
+  const q = norm(query.trim());
+  const shown = useMemo(() => (q ? result.filter((c) => matchesQuery(c, q)) : result), [result, q]);
 
   const columns = useMemo(() => {
     const extra = filters.map((f) => f.key).filter((k) => !BASE_COLUMNS.includes(k));
@@ -203,16 +209,32 @@ export default function Radar({ companies }: { companies: CompanySummary[] }) {
       </aside>
 
       <section>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm">
             <span className="font-semibold">{result.length}</span>
             <span className="text-muted"> / {pool.length} şirket kriterlere uyuyor</span>
           </p>
-          <button onClick={exportResult} className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-surface-2">
-            Excel&apos;e aktar
-          </button>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Hisse ara (ör. THYAO)"
+              aria-label="Sonuçlarda hisse ara"
+              className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-accent sm:w-56 sm:flex-none"
+            />
+            <button onClick={exportResult} className="shrink-0 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-surface-2">
+              Excel&apos;e aktar
+            </button>
+          </div>
         </div>
-        <CompaniesTable companies={result} columns={columns} showSpark={false} initialSort={sort} onSortChange={setSort} />
+        {q && shown.length === 0 ? (
+          <div className="card p-8 text-center text-sm text-muted">
+            “{query.trim()}” seçili kriterlere uyan şirketler arasında yok.
+          </div>
+        ) : (
+          <CompaniesTable companies={shown} columns={columns} showSpark={false} initialSort={sort} onSortChange={setSort} />
+        )}
       </section>
     </div>
   );

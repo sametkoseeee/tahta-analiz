@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { changeClass, compact, fundPrice, num, signedPct } from "@/lib/format";
+import { matchesQuery, norm } from "@/lib/search";
 import type { FundSummary } from "@/lib/types";
 import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
 import Sparkline from "./Sparkline";
@@ -53,12 +54,11 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
   }, [funds]);
 
   const list = useMemo(() => {
-    const term = q.trim().toLocaleUpperCase("tr");
+    const term = norm(q.trim());
     const filtered = funds.filter(
       (f) =>
         (umbrella === "all" || f.umbrella === umbrella) &&
-        (!term || f.code.includes(term) || f.name.toLocaleUpperCase("tr").includes(term) ||
-          (f.founder ?? "").toLocaleUpperCase("tr").includes(term)),
+        (!term || matchesQuery(f, term) || norm(f.founder ?? "").includes(term)),
     );
     return filtered.sort((a, b) => {
       if (sort.key === "code") return a.code.localeCompare(b.code, "tr") * sort.dir;
@@ -119,8 +119,10 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
             setQ(e.target.value);
             setPage(0);
           }}
-          placeholder="Fon kodu, adı ya da portföy şirketi"
-          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm sm:ml-auto sm:w-72"
+          type="search"
+          placeholder="Fon ara: kod, ad ya da portföy şirketi (ör. AFA)"
+          aria-label="Fonlarda ara"
+          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-accent sm:ml-auto sm:w-80"
         />
       </div>
 
