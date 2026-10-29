@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { CapitalIncrease, CapitalStatus } from "@/lib/capital";
 import { compact, num } from "@/lib/format";
+import { matchesQuery, norm } from "@/lib/search";
 import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
 import WatchButton from "./WatchButton";
 
@@ -28,12 +29,6 @@ const STATUS_STYLE: Record<CapitalStatus, string> = {
 const date = (d: string | null | undefined) => (d ? d.split("-").reverse().join(".") : null);
 const pctText = (v: number | null | undefined) => (v ? `%${num(v, v % 1 ? 2 : 0)}` : "–");
 
-/** Arama için: şirket adları KAP'ta Türkçe karaktersiz de yazılabiliyor ("Sekerbank"), harfler eşitlenir */
-const norm = (s: string) =>
-  s
-    .toLocaleUpperCase("tr")
-    .replace(/[ŞĞÜÖÇİ]/g, (c) => ({ Ş: "S", Ğ: "G", Ü: "U", Ö: "O", Ç: "C", İ: "I" })[c]!);
-
 function tab(d: CapitalIncrease): Tab {
   if (d.status === "İptal") return "cancelled";
   return d.status === "Tamamlandı" ? "done" : "open";
@@ -55,7 +50,7 @@ export default function CapitalTable({ items }: { items: CapitalIncrease[] }) {
   const q = norm(query.trim());
   // Arama yapılınca hisse hangi sekmede olursa olsun gösterilir
   const matches = useMemo(
-    () => (q ? items.filter((d) => norm(d.code).includes(q) || norm(d.name).includes(q)) : items),
+    () => (q ? items.filter((d) => matchesQuery(d, q)) : items),
     [items, q],
   );
   const counts = useMemo(() => {

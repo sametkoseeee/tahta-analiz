@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { Dividend } from "@/lib/dividends";
 import { num, pct } from "@/lib/format";
 import { useLive } from "@/lib/live";
+import { matchesQuery, norm } from "@/lib/search";
 import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
 import WatchButton from "./WatchButton";
 
@@ -40,14 +41,19 @@ export default function DividendsTable({ items, today }: { items: Dividend[]; to
     [items, quotes],
   );
 
+  const [query, setQuery] = useState("");
+  const q = norm(query.trim());
+  // Arama yapılınca hisse hangi sekmede olursa olsun gösterilir
+  const matches = useMemo(() => (q ? withYield.filter((d) => matchesQuery(d, q)) : withYield), [withYield, q]);
+
   const counts = useMemo(() => {
     const c = { upcoming: 0, paid: 0, none: 0 };
-    withYield.forEach((d) => c[group(d, today)]++);
+    matches.forEach((d) => c[group(d, today)]++);
     return c;
-  }, [withYield, today]);
+  }, [matches, today]);
 
   const list = useMemo(() => {
-    const rows = withYield.filter((d) => group(d, today) === tab);
+    const rows = q ? [...matches] : withYield.filter((d) => group(d, today) === tab);
     // Varsayılan: yaklaşanlar en yakın ödeme önce, ödenenler en yeni önce
     const s = sort ?? { key: "payDate" as Key, dir: tab === "upcoming" ? (1 as const) : (-1 as const) };
     return rows.sort((a, b) => {
@@ -58,7 +64,7 @@ export default function DividendsTable({ items, today }: { items: Dividend[]; to
       if (vb == null) return -1;
       return (typeof va === "string" ? va.localeCompare(String(vb), "tr") : va - (vb as number)) * s.dir;
     });
-  }, [withYield, tab, sort, today]);
+  }, [withYield, matches, q, tab, sort, today]);
 
   const th = (key: Key, label: string, align = "text-right", title?: string) => (
     <th
@@ -80,21 +86,32 @@ export default function DividendsTable({ items, today }: { items: Dividend[]; to
 
   return (
     <div className="space-y-3">
-      <div className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => {
-              setTab(t.key);
-              setSort(null);
-            }}
-            className={`shrink-0 rounded-md px-3 py-1.5 text-sm ${
-              tab === t.key ? "bg-accent text-white" : "text-muted hover:bg-surface-2 hover:text-text"
-            }`}
-          >
-            {t.label} <span className="opacity-70">({counts[t.key]})</span>
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Hisse ara (ör. FROTO)"
+          aria-label="Temettü tablosunda hisse ara"
+          className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-accent sm:w-64"
+        />
+        <div className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => {
+                setTab(t.key);
+                setSort(null);
+                setQuery("");
+              }}
+              className={`shrink-0 rounded-md px-3 py-1.5 text-sm ${
+                !q && tab === t.key ? "bg-accent text-white" : "text-muted hover:bg-surface-2 hover:text-text"
+              }`}
+            >
+              {t.label} <span className="opacity-70">({counts[t.key]})</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="card overflow-x-auto">
@@ -145,7 +162,7 @@ export default function DividendsTable({ items, today }: { items: Dividend[]; to
             {list.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-3 py-10 text-center text-muted">
-                  Bu listede şirket yok.
+                  {q ? `“${query.trim()}” için son 13 ayda kâr payı bildirimi yok.` : "Bu listede şirket yok."}
                 </td>
               </tr>
             )}
