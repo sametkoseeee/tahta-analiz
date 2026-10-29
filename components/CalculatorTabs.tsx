@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import CapitalCalculator, { type CalcPreset } from "./CapitalCalculator";
+import CostCalculator from "./CostCalculator";
 import RightsCalculator from "./RightsCalculator";
 
 const TABS = [
   { key: "sermaye", label: "Sermaye artırımı" },
   { key: "ruchan", label: "Rüçhan hakkı" },
+  { key: "maliyet", label: "Hisse maliyet" },
 ] as const;
 
 type Tab = (typeof TABS)[number]["key"];
@@ -38,7 +40,9 @@ export default function CalculatorTabs({ presets }: { presets: CalcPreset[] }) {
           </button>
         ))}
       </div>
-      {tab === "sermaye" ? <CapitalCalculator presets={presets} /> : <RightsCalculator presets={presets} />}
+      {tab === "sermaye" && <CapitalCalculator presets={presets} />}
+      {tab === "ruchan" && <RightsCalculator presets={presets} />}
+      {tab === "maliyet" && <CostCalculator />}
     </div>
   );
 }

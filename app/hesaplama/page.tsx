@@ -5,8 +5,8 @@ import { getCapital } from "@/lib/capital";
 import { getIndex } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Sermaye Artırımı ve Rüçhan Hakkı Hesaplama",
-  description: "Bedelli ve bedelsiz sermaye artırımı sonrası lot sayısı, teorik fiyat, rüçhan hakkı değeri ve ödenecek tutar hesaplama araçları",
+  title: "Sermaye Artırımı, Rüçhan Hakkı ve Hisse Maliyet Hesaplama",
+  description: "Bedelli ve bedelsiz sermaye artırımı, rüçhan hakkı değeri ve hisse ortalama maliyet hesaplama araçları",
 };
 
 export default function CalculatorsPage() {
