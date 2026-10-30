@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FundAllocation from "@/components/FundAllocation";
+import FundHoldingsList from "@/components/FundHoldingsList";
 import PriceChart from "@/components/PriceChart";
 import { allocationGroups, allocationItems } from "@/lib/allocation";
+import { getFundHoldings } from "@/lib/holdings";
 import WatchButton from "@/components/WatchButton";
 import { getFund, getFunds } from "@/lib/data";
 import { changeClass, compact, fundPrice, num, pct, signedPct } from "@/lib/format";
@@ -35,6 +37,7 @@ export default async function FundPage({ params }: Props) {
   const f = getFund(kod);
   if (!f) notFound();
   const alloc = allocationItems(f.alloc);
+  const holdings = getFundHoldings(f.code);
   const date = f.priceDate?.split("-").reverse().join(".");
 
   const stats: [string, string, string?][] = [
@@ -114,6 +117,8 @@ export default async function FundPage({ params }: Props) {
       </section>
 
       {alloc.length > 0 && <FundAllocation items={alloc} groups={allocationGroups(alloc)} date={f.allocDate ?? null} />}
+
+      {holdings && holdings.items.length > 0 && <FundHoldingsList holdings={holdings} />}
 
       <p className="text-xs text-muted">
         Veriler{" "}

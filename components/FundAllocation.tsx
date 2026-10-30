@@ -89,8 +89,7 @@ export default function FundAllocation({
         </div>
       </div>
       <p className="mt-4 text-xs text-muted">
-        Fonun parasının hangi varlık türlerinde durduğunu gösterir. Fonun tek tek hangi hisse ya da tahvilleri tuttuğu bu
-        dağılımda yer almaz.
+        Fonun parasının hangi varlık türlerinde durduğunu gösterir.
       </p>
     </section>
   );
