@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { changeClass, compact, fundPrice, num, signedPct } from "@/lib/format";
 import { matchesQuery, norm } from "@/lib/search";
-import type { FundSummary } from "@/lib/types";
-import { STICKY_CELL, STICKY_HEAD } from "./CompaniesTable";
+import type { FundRow } from "@/lib/fund-rows";
+import { STICKY_CELL, STICKY_HEAD, useRowLink } from "./CompaniesTable";
 import Sparkline from "./Sparkline";
 import WatchButton from "./WatchButton";
 
@@ -28,8 +28,8 @@ const COLUMNS: { key: Key; label: string; title?: string }[] = [
 const RETURN_KEYS = new Set<Key>(["change", "r1m", "r3m", "r6m", "rytd", "r1y", "r3y"]);
 const PAGE = 50;
 
-function cell(f: FundSummary, k: Key): string {
-  const v = f[k as keyof FundSummary] as number | null;
+function cell(f: FundRow, k: Key): string {
+  const v = f[k as keyof FundRow] as number | null;
   if (k === "price") return fundPrice(v);
   if (k === "size") return compact(v);
   if (k === "investors") return num(v, 0);
@@ -41,11 +41,12 @@ function cell(f: FundSummary, k: Key): string {
 const short = (u: string) => u.replace(/\s*Şemsiye Fonu$/i, "").trim();
 
 /** bare: izleme listesindeki gibi az fon için filtre çubuğu olmadan */
-export default function FundsTable({ funds, bare = false }: { funds: FundSummary[]; bare?: boolean }) {
+export default function FundsTable({ funds, bare = false }: { funds: FundRow[]; bare?: boolean }) {
   const [q, setQ] = useState("");
   const [umbrella, setUmbrella] = useState("all");
   const [sort, setSort] = useState<{ key: Key; dir: 1 | -1 }>({ key: "size", dir: -1 });
   const [page, setPage] = useState(0);
+  const rowLink = useRowLink();
 
   const umbrellas = useMemo(() => {
     const count = new Map<string, number>();
@@ -62,8 +63,8 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
     );
     return filtered.sort((a, b) => {
       if (sort.key === "code") return a.code.localeCompare(b.code, "tr") * sort.dir;
-      const va = a[sort.key as keyof FundSummary] as number | null;
-      const vb = b[sort.key as keyof FundSummary] as number | null;
+      const va = a[sort.key as keyof FundRow] as number | null;
+      const vb = b[sort.key as keyof FundRow] as number | null;
       if (va == null && vb == null) return 0;
       if (va == null) return 1; // boşlar her zaman sonda
       if (vb == null) return -1;
@@ -138,7 +139,11 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
             </thead>
             <tbody>
               {rows.map((f) => (
-                <tr key={f.code} className="group border-b border-border last:border-0 hover:bg-surface-2">
+                <tr
+                  key={f.code}
+                  onClick={rowLink(`/fonlar/${f.code}`)}
+                  className="group cursor-pointer border-b border-border last:border-0 hover:bg-surface-2"
+                >
                   <td className={`px-3 py-2 ${STICKY_CELL}`}>
                     <div className="flex items-center gap-2.5">
                       <WatchButton code={f.code} compact />
@@ -157,7 +162,7 @@ export default function FundsTable({ funds, bare = false }: { funds: FundSummary
                     <td
                       key={c.key}
                       className={`whitespace-nowrap px-3 py-2 text-right ${
-                        RETURN_KEYS.has(c.key) ? changeClass(f[c.key as keyof FundSummary] as number | null) : ""
+                        RETURN_KEYS.has(c.key) ? changeClass(f[c.key as keyof FundRow] as number | null) : ""
                       }`}
                     >
                       {cell(f, c.key)}

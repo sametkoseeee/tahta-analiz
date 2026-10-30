@@ -7,7 +7,8 @@ import { fetchNews } from "@/lib/news";
 import { markRead, notificationsEnabled, notificationsSupported, setNotificationsEnabled } from "@/lib/notify";
 import { currentSubscription, disablePush, enablePush, pushActive, pushSupported } from "@/lib/push";
 import { stockCodes } from "@/lib/codes";
-import type { CompanySummary, FundSummary } from "@/lib/types";
+import type { FundRow } from "@/lib/fund-rows";
+import type { CompanySummary } from "@/lib/types";
 import { useWatchlist } from "@/lib/watchlist";
 import CompaniesTable from "./CompaniesTable";
 import FundsTable from "./FundsTable";
@@ -149,7 +150,7 @@ function RemoveChips({ codes, remove }: { codes: string[]; remove: (c: string) =
   );
 }
 
-export default function Watchlist({ companies, funds }: { companies: CompanySummary[]; funds: FundSummary[] }) {
+export default function Watchlist({ companies, funds }: { companies: CompanySummary[]; funds: FundRow[] }) {
   const { list, remove, signedIn } = useWatchlist();
   const watched = useMemo(() => companies.filter((c) => list.includes(c.code)), [companies, list]);
   const watchedFunds = useMemo(() => funds.filter((f) => list.includes(f.code)), [funds, list]);

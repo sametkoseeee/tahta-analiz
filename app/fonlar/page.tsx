@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FundsTable from "@/components/FundsTable";
 import { getFunds } from "@/lib/data";
+import { toFundRow } from "@/lib/fund-rows";
 
 export const metadata: Metadata = {
   title: "Yatırım Fonları",
@@ -30,7 +31,7 @@ export default function FundsPage() {
         </p>
       </div>
       {funds.length > 0 ? (
-        <FundsTable funds={funds} />
+        <FundsTable funds={funds.map(toFundRow)} />
       ) : (
         <div className="card p-8 text-center text-sm text-muted">Fon verisi henüz yüklenmedi.</div>
       )}

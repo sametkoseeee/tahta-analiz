@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { changeClass } from "@/lib/format";
 import { useLiveCompanies } from "@/lib/live";
@@ -26,6 +27,16 @@ export function sortCompanies(list: CompanySummary[], sort: SortState) {
 /** Yatay kaydırırken hisse sütunu sabit kalsın (telefonda tablo ekrana sığmıyor) */
 export const STICKY_HEAD = "sticky left-0 z-10 bg-surface";
 export const STICKY_CELL = "sticky left-0 z-10 bg-surface group-hover:bg-surface-2";
+
+/** Satırın her yeri sayfayı açsın (yalnızca kod/ad değil); izleme yıldızı ve bağlantılar kendi işini yapar */
+export function useRowLink() {
+  const router = useRouter();
+  return (href: string) => (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("a, button") || window.getSelection()?.toString()) return;
+    if (e.ctrlKey || e.metaKey) window.open(href, "_blank");
+    else router.push(href);
+  };
+}
 
 const CHANGE_KEYS =new Set<MetricKey>(["change", "change1y", "revenueGrowth", "netIncomeGrowth"]);
 
@@ -58,6 +69,7 @@ export default function CompaniesTable({
   };
   // Seans içi güncel fiyatlar (varsa) sıralamadan önce uygulanır
   const live = useLiveCompanies(companies);
+  const rowLink = useRowLink();
   const sorted = useMemo(() => sortCompanies(live, sort), [live, sort]);
   const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
   const page = Math.min(paging.page, pageCount - 1);
@@ -92,7 +104,11 @@ export default function CompaniesTable({
         </thead>
         <tbody>
           {rows.map((c) => (
-            <tr key={c.code} className="group border-b border-border last:border-0 hover:bg-surface-2">
+            <tr
+              key={c.code}
+              onClick={rowLink(`/sirketler/${c.code}`)}
+              className="group cursor-pointer border-b border-border last:border-0 hover:bg-surface-2"
+            >
               <td className={`px-3 py-2 ${STICKY_CELL}`}>
                 <div className="flex items-center gap-2.5">
                   <WatchButton code={c.code} compact />
