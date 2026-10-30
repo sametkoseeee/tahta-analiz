@@ -108,7 +108,12 @@ export type FundSummary = {
   spark: number[];
 };
 
-export type FundDetail = Omit<FundSummary, "spark"> & { prices: { d: string; c: number }[] };
+export type FundDetail = Omit<FundSummary, "spark"> & {
+  prices: { d: string; c: number }[];
+  /** TEFAS portföy dağılımı: alan kodu → yüzde (lib/allocation.ts) */
+  alloc?: Record<string, number>;
+  allocDate?: string;
+};
 
 /** Mali tablo bileşenlerine giden kısım (fiyat geçmişi olmadan) */
 export type Financials = Pick<CompanyDetail, "code" | "financialCurrency" | "statements">;

@@ -81,6 +81,28 @@ def fetch_history(code: str) -> tuple[str, list, dict | None]:
         return code, [], None
 
 
+def fetch_allocations(today: date) -> tuple[str | None, dict[str, dict[str, float]]]:
+    """Tüm fonların portföy (varlık) dağılımı tek istekte: TEFAS "Fon Verileri > Portföy Dağılımı".
+    Tatil/hafta sonu için son 7 güne kadar geri gidilir. Yalnızca sıfırdan büyük oranlar tutulur."""
+    for back in range(8):
+        day = today - timedelta(days=back)
+        body = {"fonTipi": "YAT", "fonKodu": None, "aramaMetni": None, "fonTurKod": None, "fonGrubu": None,
+                "sfonTurKod": None, "basTarih": ymd(day), "bitTarih": ymd(day), "basSira": 1, "bitSira": 5000,
+                "fonTurAciklama": None, "dil": "TR", "kurucuKod": None, "sFonTurKod": "", "fonKod": "",
+                "fonGrup": "", "fonUnvanTip": ""}
+        try:
+            rows = post("dagilimSiraliGetirT", body)
+        except Exception:  # noqa: BLE001  (o gün veri yok: "Index 0 out of bounds")
+            rows = []
+        if rows:
+            skip = {"fonKodu", "fonUnvan", "tarih", "bilFiyat"}
+            alloc = {r["fonKodu"]: {k: round(v, 2) for k, v in r.items()
+                                    if k not in skip and isinstance(v, (int, float)) and v > 0}
+                     for r in rows}
+            return day.isoformat(), alloc
+    return None, {}
+
+
 def change_since(prices: list, days: int):
     if len(prices) < 2:
         return None
@@ -102,6 +124,10 @@ def main() -> None:
                                              "calismaTipi": 2})}
     founders = {f.get("kurucuKod") or f.get("kurucuKodu"): f.get("kurucuUnvan") or f.get("unvan")
                 for f in post("fonKurucuGetir", {"fonTipi": "YAT", "dil": "TR"})}
+
+    print("TEFAS: portföy dağılımları")
+    alloc_date, allocations = fetch_allocations(today)
+    print(f"  {len(allocations)} fon ({alloc_date})")
 
     print("TEFAS: fiyat geçmişleri")
     codes = [r["fonKodu"] for r in returns]
@@ -153,6 +179,13 @@ def main() -> None:
         funds.append(summary)
         detail = {k: v for k, v in summary.items() if k != "spark"}
         detail["prices"] = prices
+        if allocations.get(code):
+            detail["alloc"] = allocations[code]
+            detail["allocDate"] = alloc_date
+        elif old.exists():  # dağılım çekilemediyse önceki kalsın
+            prev = json.loads(old.read_text(encoding="utf-8"))
+            if prev.get("alloc"):
+                detail["alloc"], detail["allocDate"] = prev["alloc"], prev.get("allocDate")
         old.write_text(json.dumps(detail, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     funds.sort(key=lambda f: f["size"] or 0, reverse=True)
