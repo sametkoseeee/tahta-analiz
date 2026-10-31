@@ -4,6 +4,7 @@ import Link from "next/link";
 import { changeClass, compact, num, signedPct } from "@/lib/format";
 import { useLiveCompanies } from "@/lib/live";
 import type { CompanySummary } from "@/lib/types";
+import DailyIdea from "./DailyIdea";
 import HomeList from "./HomeList";
 
 function Movers({ title, list }: { title: string; list: CompanySummary[] }) {
@@ -79,6 +80,8 @@ export default function MarketOverview({ companies: base }: { companies: Company
           </ul>
         </div>
       </section>
+
+      <DailyIdea />
 
       <HomeList companies={base} />
     </div>
