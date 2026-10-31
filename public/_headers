@@ -1,4 +1,12 @@
 # Cloudflare Pages yanıt başlıkları
+
+# Güvenlik: yalnızca HTTPS, başka sitelerin çerçevesine gömülemez (tıklama tuzağı), gereksiz tarayıcı izinleri kapalı
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
 # Fiyat serileri uzantısız dosya olarak yayınlanıyor; tarayıcı JSON olarak okusun
 /api/seri/*
   Content-Type: application/json; charset=utf-8

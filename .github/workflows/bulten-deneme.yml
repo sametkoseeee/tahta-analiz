@@ -1,12 +1,10 @@
 name: Hap Bilgiler denemesi
 
-# Hap Bilgiler bültenini yalnızca girilen adrese gönderir (abonelere gitmez). Actions > Hap Bilgiler denemesi > Run workflow.
+# Hap Bilgiler bültenini yalnızca BULTEN_TEST_TO gizli değişkenindeki adrese gönderir (abonelere gitmez).
+# Depo herkese açık olduğundan adres iş girdisi olarak alınmaz: girdiler iş kayıtlarında görünür, gizli değişkenler görünmez.
+# Actions > Hap Bilgiler denemesi > Run workflow.
 on:
   workflow_dispatch:
-    inputs:
-      email:
-        description: "Bültenin gönderileceği e-posta adresi"
-        required: true
 
 jobs:
   gonder:
@@ -25,8 +23,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: node --no-warnings scripts/weekly_bulletin.mjs --test
+      - run: |
+          if [ -z "$BULTEN_TEST_TO" ]; then echo "BULTEN_TEST_TO gizli değişkeni tanımlı değil"; exit 1; fi
+          node --no-warnings scripts/weekly_bulletin.mjs --test
         env:
-          BULTEN_TEST_TO: ${{ inputs.email }}
+          BULTEN_TEST_TO: ${{ secrets.BULTEN_TEST_TO }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

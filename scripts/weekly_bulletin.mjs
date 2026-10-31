@@ -122,7 +122,8 @@ async function send(emails, html) {
       body: JSON.stringify({ from: FROM, to, subject: `Hap Bilgiler · ${trDate(today)}`, html }),
     });
     if (r.ok) sent++;
-    else console.error(`Gönderilemedi (${r.status}): ${(await r.text()).slice(0, 200)}`);
+    // Depo herkese açık, iş kayıtları görülebilir: hata metnindeki alıcı adresi yazılmaz
+    else console.error(`Gönderilemedi (${r.status}): ${(await r.text()).replaceAll(to, "***").slice(0, 200)}`);
     await new Promise((res) => setTimeout(res, 600));
   }
   return sent;
