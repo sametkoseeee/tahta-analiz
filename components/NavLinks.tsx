@@ -6,7 +6,8 @@ import { useEffect, useRef } from "react";
 
 const LINKS = [
   { href: "/", label: "Hisseler", match: (p: string) => p === "/" || p.startsWith("/sirketler") },
-  { href: "/radar", label: "Hisse Radar" },
+  { href: "/piyasa", label: "Piyasa" },
+  { href: "/radar", label: "Radar" },
   { href: "/karsilastir", label: "Karşılaştır" },
   { href: "/fonlar", label: "Fonlar" },
   { href: "/bilancolar", label: "Bilançolar" },
@@ -15,10 +16,11 @@ const LINKS = [
   { href: "/tedbirli-hisseler", label: "Tedbirli" },
   { href: "/sermaye-artirimi", label: "Sermaye Artırımı" },
   { href: "/halka-arz", label: "Halka Arz" },
+  { href: "/iceriden-islemler", label: "İçeriden" },
   { href: "/endeksler", label: "Endeksler" },
   { href: "/hesaplama", label: "Hesaplama" },
   { href: "/portfoy", label: "Portföyüm" },
-  { href: "/izleme-listesi", label: "İzleme Listesi" },
+  { href: "/izleme-listesi", label: "İzleme" },
 ];
 
 /** Üst menü; bulunulan bölüm vurgulanır. Telefonda yatay kaydırılır. */
@@ -42,7 +44,7 @@ export default function NavLinks() {
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`shrink-0 rounded-md px-2.5 py-1.5 ${
+            className={`shrink-0 rounded-md px-2 py-1.5 ${
               active ? "bg-accent-soft font-medium text-accent" : "text-muted hover:bg-surface-2 hover:text-text"
             }`}
           >

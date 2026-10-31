@@ -82,6 +82,18 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: python -u scripts/fetch_dividends.py
+      - name: Ekonomik takvimi çek (TÜİK, TCMB)
+        # 3 istek; kurumlara ulaşılamazsa önceki takvim kalır
+        if: github.event_name != 'push' || hashFiles('data/econ.json') == ''
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python -u scripts/fetch_econ.py
+      - name: İçeriden işlemleri çek (KAP)
+        # Yönetici alım-satımları ve pay geri alımları; çalıştırma başına en fazla 120 bildirim (~10 dk)
+        if: github.event_name != 'push' || hashFiles('data/insider.json') == ''
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python -u scripts/fetch_insider.py
       - name: Halka arzları çek (KAP)
         # Yılda ~60 bildirim; açılanlar önbellekte, her akşam yalnız yeniler açılır
         if: github.event_name != 'push' || hashFiles('data/ipos.json') == ''

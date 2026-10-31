@@ -6,8 +6,10 @@ import FinancialCharts from "@/components/FinancialCharts";
 import NewsList from "@/components/NewsList";
 import PriceChart from "@/components/PriceChart";
 import Statements from "@/components/Statements";
+import PeerTable from "@/components/PeerTable";
 import StockHolders from "@/components/StockHolders";
 import { getStockHolders } from "@/lib/holdings";
+import { getPeers } from "@/lib/sectors";
 import WatchButton from "@/components/WatchButton";
 import { getCompany, getIndex } from "@/lib/data";
 import { num } from "@/lib/format";
@@ -35,6 +37,7 @@ export default async function CompanyPage({ params }: Props) {
   const measure = getActiveMeasure(c.code);
   const capital = getOpenCapital(c.code);
   const holders = getStockHolders(c.code);
+  const peers = getPeers(c.code);
   const fin = { code: c.code, financialCurrency: c.financialCurrency, statements: c.statements };
   return (
     <div className="space-y-6">
@@ -98,6 +101,8 @@ export default async function CompanyPage({ params }: Props) {
       </section>
 
       <RatioGroups code={c.code} metrics={m} />
+
+      {peers && <PeerTable code={c.code} sector={peers.sector} peers={peers.peers} median={peers.median} />}
 
       {holders.length > 0 && <StockHolders code={c.code} holders={holders} />}
 

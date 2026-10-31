@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getFunds, getIndex } from "@/lib/data";
+import { GLOSSARY } from "@/lib/glossary";
 
 export const dynamic = "force-static";
 
@@ -27,10 +28,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/sermaye-artirimi", 0.8),
     page("/halka-arz", 0.8),
     page("/endeksler", 0.8),
+    page("/piyasa", 0.8),
+    page("/iceriden-islemler", 0.8),
+    page("/sozluk", 0.6, "monthly"),
     page("/hesaplama", 0.6, "weekly"),
     page("/karsilastir", 0.6, "weekly"),
     page("/fonlar/karsilastir", 0.6, "weekly"),
     page("/kvkk", 0.2, "monthly"),
+    ...GLOSSARY.map((t) => page(`/sozluk/${t.slug}`, 0.5, "monthly")),
     ...companies.map((c) => page(`/sirketler/${c.code}`, 0.7)),
     ...getFunds().funds.map((f) => page(`/fonlar/${f.code}`, 0.5)),
   ];
