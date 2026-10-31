@@ -4,6 +4,7 @@ import StockCompare from "@/components/StockCompare";
 import { getIndex } from "@/lib/data";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/karsilastir" },
   title: "Hisse Karşılaştırma",
   description: "BIST hisselerinin oranlarını ve fiyat performansını yan yana karşılaştır",
 };

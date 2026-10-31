@@ -3,6 +3,7 @@ import IposTable from "@/components/IposTable";
 import { getIpos } from "@/lib/ipos";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/halka-arz" },
   title: "Halka Arz Takvimi",
   description: "Borsa İstanbul halka arzları: talep toplama tarihleri, halka arz fiyatı, büyüklük, katılımcı sayısı ve getiri",
 };

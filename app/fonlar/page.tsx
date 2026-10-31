@@ -5,6 +5,7 @@ import { getFunds } from "@/lib/data";
 import { toFundRow } from "@/lib/fund-rows";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/fonlar" },
   title: "Yatırım Fonları",
   description: "TEFAS'ta işlem gören yatırım fonlarının getirileri, büyüklükleri ve fiyat geçmişi",
 };

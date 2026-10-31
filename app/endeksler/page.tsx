@@ -3,6 +3,7 @@ import IndicesTable from "@/components/IndicesTable";
 import { getIndicesData } from "@/lib/indices-data";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/endeksler" },
   title: "Borsa İstanbul Endeksleri",
   description: "BIST 100, BIST 30, XBANK, XUSIN ve tüm sektör endekslerinin son değeri, günlük ve dönemsel getirileri",
 };

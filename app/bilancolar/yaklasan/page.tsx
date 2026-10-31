@@ -4,6 +4,7 @@ import UpcomingReports from "@/components/UpcomingReports";
 import { getReports } from "@/lib/reports";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/bilancolar/yaklasan" },
   title: "Yaklaşan Bilançolar",
   description: "Bilanço açıklama tarihini KAP'ta duyuran BIST şirketleri, gün gün",
 };

@@ -4,6 +4,7 @@ import CapitalTable from "@/components/CapitalTable";
 import { getCapital } from "@/lib/capital";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/sermaye-artirimi" },
   title: "Sermaye Artırımı Tablosu",
   description: "Bedelli, bedelsiz ve tahsisli sermaye artırımı yapacak BIST şirketleri: oranlar, rüçhan fiyatı ve tarihler",
 };

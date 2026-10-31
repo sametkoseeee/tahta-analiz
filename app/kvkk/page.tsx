@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/kvkk" },
   title: "KVKK Aydınlatma Metni",
   description: "Tahta Analiz'in kişisel verileri nasıl işlediğine dair bilgilendirme.",
 };

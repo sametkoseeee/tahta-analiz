@@ -3,6 +3,7 @@ import MeasuresTable from "@/components/MeasuresTable";
 import { getMeasures } from "@/lib/measures";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/tedbirli-hisseler" },
   title: "Tedbirli Hisseler",
   description: "Borsa İstanbul Volatilite Bazlı Tedbir Sistemi (VBTS) kapsamında tedbir uygulanan hisseler ve tedbir süreleri",
 };

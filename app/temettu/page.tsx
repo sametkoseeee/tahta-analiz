@@ -4,6 +4,7 @@ import DividendsTable from "@/components/DividendsTable";
 import { dividendPresets, getDividends } from "@/lib/dividends";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/temettu" },
   title: "Temettü Takvimi",
   description: "BIST şirketlerinin kâr payı (temettü) dağıtımları: pay başına tutar, verim ve ödeme tarihleri",
 };

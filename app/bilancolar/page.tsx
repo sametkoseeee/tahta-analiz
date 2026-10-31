@@ -4,6 +4,7 @@ import ReportsTabs from "@/components/ReportsTabs";
 import { getReports } from "@/lib/reports";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/bilancolar" },
   title: "Son Bilançolar",
   description: "KAP'ta açıklanan son bilançolar: dönem, net kâr, yıllık değişim, F/K ve PD/DD",
 };

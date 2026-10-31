@@ -5,6 +5,7 @@ import FundCompare from "@/components/FundCompare";
 import { getFunds } from "@/lib/data";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/fonlar/karsilastir" },
   title: "Fon Karşılaştırma",
   description: "TEFAS fonlarının getirilerini aynı grafikte ve tabloda karşılaştır",
 };

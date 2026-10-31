@@ -3,6 +3,7 @@ import ViopTable from "@/components/ViopTable";
 import { getViop } from "@/lib/viop";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/viop" },
   title: "VİOP Teminat Tablosu",
   description: "VİOP vadeli işlem sözleşmelerinin yaklaşık başlangıç teminatı ve kaldıraç oranları (Takasbank PSR)",
 };

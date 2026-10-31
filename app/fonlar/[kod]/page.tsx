@@ -19,7 +19,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kod } = await params;
   const f = getFund(kod);
-  return f ? { title: `${f.code} · ${f.name}`, description: `${f.name} fiyatı, getirileri ve büyüklüğü` } : { title: "Bulunamadı" };
+  return f
+    ? {
+        title: `${f.code} · ${f.name}`,
+        description: `${f.name} fiyatı, getirileri ve büyüklüğü`,
+        alternates: { canonical: `/fonlar/${f.code}` },
+      }
+    : { title: "Bulunamadı" };
 }
 
 const RETURNS = [

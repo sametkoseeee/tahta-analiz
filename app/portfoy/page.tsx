@@ -4,6 +4,7 @@ import { getIndex } from "@/lib/data";
 import { dividendPresets } from "@/lib/dividends";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/portfoy" },
   title: "Portföyüm",
   description: "Hisselerini ve maliyetini gir; portföy değeri, kâr / zarar ve beklenen temettü",
 };

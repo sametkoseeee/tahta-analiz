@@ -24,7 +24,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kod } = await params;
   const c = getCompany(kod);
-  return { title: c ? `${c.code} · ${c.name}` : "Bulunamadı" };
+  return c ? { title: `${c.code} · ${c.name}`, alternates: { canonical: `/sirketler/${c.code}` } } : { title: "Bulunamadı" };
 }
 
 export default async function CompanyPage({ params }: Props) {

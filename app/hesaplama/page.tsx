@@ -6,6 +6,7 @@ import { getIndex } from "@/lib/data";
 import { dividendPresets } from "@/lib/dividends";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/hesaplama" },
   title: "Sermaye Artırımı, Rüçhan Hakkı, Hisse Maliyet ve Temettü Geliri Hesaplama",
   description: "Bedelli ve bedelsiz sermaye artırımı, rüçhan hakkı değeri, hisse ortalama maliyet ve temettü geliri hesaplama araçları",
 };
