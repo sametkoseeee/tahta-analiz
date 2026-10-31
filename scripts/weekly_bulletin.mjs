@@ -1,4 +1,4 @@
-// Haftalık e-posta bülteni: bültene abone olan üyelere (newsletter tablosu) Resend ile gönderilir.
+// "Hap Bilgiler" haftalık e-posta bülteni: bültene abone olan üyelere (newsletter tablosu) Resend ile gönderilir.
 // Cuma akşamı yayın iş akışında, veri güncellendikten sonra çalışır (.github/workflows/yayin.yml).
 // Diğer günler hiçbir şey yapmaz; elle denemek için: node --env-file=.env.local scripts/weekly_bulletin.mjs --force
 // --dry-run: göndermez, e-postayı out/bulten.html'e yazar.
@@ -68,15 +68,15 @@ function buildHtml() {
 
   const html = `<!doctype html><html lang="tr"><body style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a">
 <div style="max-width:600px;margin:0 auto;background:#fff;padding:24px">
-  <div style="font-size:20px;font-weight:bold">Tahta Analiz · Haftalık Bülten</div>
+  <div style="font-size:20px;font-weight:bold">Tahta Analiz · Hap Bilgiler</div>
   <div style="color:#64748b;font-size:13px;margin-top:4px">${trDate(today)} · önümüzdeki 7 gün</div>
   ${section("Açıklanacak bilançolar", reports, "Bu hafta takvimde bilanço yok.", "/bilancolar/yaklasan")}
   ${section("Temettü ödemeleri", dividends, "Bu hafta temettü ödemesi yok.", "/temettu")}
   ${section("Halka arzlar", ipos, "Şu an talep toplayan ya da yaklaşan halka arz yok.", "/halka-arz")}
   ${section("Bu hafta tedbire girenler", measures, "Bu hafta yeni tedbir yok.", "/tedbirli-hisseler")}
   <p style="margin-top:28px;font-size:12px;color:#64748b">
-    Bu e-postayı Tahta Analiz'de bültene abone olduğun için aldın. Yatırım tavsiyesi değildir.<br>
-    Abonelikten çıkmak için: ${link("/portfoy#bulten", "Portföyüm › Haftalık e-posta bülteni")}
+    Bu e-postayı Tahta Analiz'de Hap Bilgiler'e abone olduğun için aldın. Yatırım tavsiyesi değildir.<br>
+    Abonelikten çıkmak için: ${link("/portfoy#bulten", "Portföyüm › Hap Bilgiler")}
   </p>
 </div></body></html>`;
   return { html, empty: !reports.length && !dividends.length && !ipos.length && !measures.length };
@@ -119,7 +119,7 @@ async function send(emails, html) {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to, subject: `Haftalık Bülten · ${trDate(today)}`, html }),
+      body: JSON.stringify({ from: FROM, to, subject: `Hap Bilgiler · ${trDate(today)}`, html }),
     });
     if (r.ok) sent++;
     else console.error(`Gönderilemedi (${r.status}): ${(await r.text()).slice(0, 200)}`);

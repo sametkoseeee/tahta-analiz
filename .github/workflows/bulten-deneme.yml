@@ -1,6 +1,6 @@
-name: Bülten denemesi
+name: Hap Bilgiler denemesi
 
-# Haftalık bülteni yalnızca girilen adrese gönderir (abonelere gitmez). Actions > Bülten denemesi > Run workflow.
+# Hap Bilgiler bültenini yalnızca girilen adrese gönderir (abonelere gitmez). Actions > Hap Bilgiler denemesi > Run workflow.
 on:
   workflow_dispatch:
     inputs:

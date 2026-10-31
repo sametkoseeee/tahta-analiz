@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase/client";
 
-/** Haftalık e-posta bülteni: yalnızca üyenin açıkça işaretlemesiyle (newsletter tablosu) */
+/** Hap Bilgiler (haftalık e-posta bülteni): yalnızca üyenin açıkça işaretlemesiyle (newsletter tablosu) */
 export default function NewsletterToggle() {
   const user = useUser();
   const [on, setOn] = useState<boolean | null>(null);
@@ -33,9 +33,9 @@ export default function NewsletterToggle() {
   return (
     <section id="bulten" className="card flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <h2 className="font-semibold">Haftalık e-posta bülteni</h2>
+        <h2 className="font-semibold">Hap Bilgiler</h2>
         <p className="mt-0.5 text-sm text-muted">
-          Her cuma akşamı: haftaya açıklanacak bilançolar, yaklaşan temettü ödemeleri, halka arzlar ve tedbire girenler.
+          Her cuma akşamı e-postana: haftaya açıklanacak bilançolar, yaklaşan temettü ödemeleri, halka arzlar ve tedbire girenler.
           {on ? ` ${user.email} adresine gönderilir.` : ""}
         </p>
       </div>

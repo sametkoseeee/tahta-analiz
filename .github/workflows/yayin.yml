@@ -116,7 +116,7 @@ jobs:
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           NEXT_PUBLIC_CF_BEACON: ${{ secrets.NEXT_PUBLIC_CF_BEACON }}
-      - name: Haftalık bülteni gönder (cuma)
+      - name: Hap Bilgiler bültenini gönder (cuma)
         # Yalnızca akşam çalıştırmasında; betik cuma dışındaki günlerde bir şey yapmaz. RESEND_API_KEY yoksa atlanır.
         if: github.event_name == 'schedule'
         continue-on-error: true

@@ -96,7 +96,7 @@ export default function KvkkPage() {
         <li>İzleme listenizi saklamak ve tüm cihazlarınızda aynı şekilde göstermek,</li>
         <li>İzlediğiniz şirketler KAP&apos;ta bildirim yayımladığında size anlık bildirim göndermek (yalnızca açtıysanız),</li>
         <li>Portföyünüzü saklamak ve tüm cihazlarınızda göstermek,</li>
-        <li>Açıkça abone olduysanız haftalık e-posta bültenini göndermek,</li>
+        <li>Açıkça abone olduysanız haftalık &quot;Hap Bilgiler&quot; e-posta bültenini göndermek,</li>
         <li>Sitenin ve kullanıcıların güvenliğini sağlamak, kötüye kullanımı önlemek,</li>
         <li>Yasal yükümlülükleri yerine getirmek ve yetkili kurumların talep etmesi hâlinde bilgi vermek.</li>
       </ul>
@@ -147,7 +147,7 @@ export default function KvkkPage() {
             </tr>
             <tr>
               <td>Resend</td>
-              <td>Doğrulama ve şifre sıfırlama e-postalarının, abone olduysanız haftalık bültenin gönderilmesi</td>
+              <td>Doğrulama ve şifre sıfırlama e-postalarının, abone olduysanız haftalık &quot;Hap Bilgiler&quot; bülteninin gönderilmesi</td>
               <td>İrlanda (AB)</td>
             </tr>
             <tr>
