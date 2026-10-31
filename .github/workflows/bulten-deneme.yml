@@ -1,0 +1,32 @@
+name: Bülten denemesi
+
+# Haftalık bülteni yalnızca girilen adrese gönderir (abonelere gitmez). Actions > Bülten denemesi > Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Bültenin gönderileceği e-posta adresi"
+        required: true
+
+jobs:
+  gonder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # Son akşam çalıştırmasının verisi (bilanço, temettü, halka arz, tedbir)
+      - uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: veri-${{ github.run_id }}
+          restore-keys: veri-
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --no-warnings scripts/weekly_bulletin.mjs --test
+        env:
+          BULTEN_TEST_TO: ${{ inputs.email }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

@@ -7,6 +7,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const args = new Set(process.argv.slice(2));
 const DRY = args.has("--dry-run");
+// --test: yalnızca BULTEN_TEST_TO adresine gönderir (abonelere değil), gün kontrolü yapılmaz
+const TEST_TO = args.has("--test") ? process.env.BULTEN_TEST_TO : null;
 const env = (name) => {
   const v = process.env[name];
   if (!v) throw new Error(`${name} ortam değişkeni eksik`);
@@ -81,13 +83,14 @@ function buildHtml() {
 }
 
 async function main() {
-  if (!isFriday && !args.has("--force") && !DRY) return console.log("Bülten yalnızca cuma gönderilir");
+  if (!isFriday && !args.has("--force") && !DRY && !TEST_TO) return console.log("Bülten yalnızca cuma gönderilir");
   const { html, empty } = buildHtml();
   if (DRY) {
     mkdirSync(new URL("../out/", import.meta.url), { recursive: true });
     writeFileSync(new URL("../out/bulten.html", import.meta.url), html);
     return console.log("out/bulten.html yazıldı");
   }
+  if (TEST_TO) return console.log(`Deneme: ${(await send([TEST_TO], html))} e-posta gönderildi`);
   if (empty) return console.log("Bu hafta bültende içerik yok, gönderilmedi");
 
   const db = createClient(env("NEXT_PUBLIC_SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false } });
@@ -105,9 +108,13 @@ async function main() {
     if (data.users.length < 1000) break;
   }
 
+  console.log(`${emails.length} abone, ${await send(emails, html)} e-posta gönderildi`);
+}
+
+/** Her alıcıya ayrı e-posta (alıcılar birbirini görmesin); Resend saniyede 2 istek sınırı */
+async function send(emails, html) {
   const key = env("RESEND_API_KEY");
   let sent = 0;
-  // Her aboneye ayrı e-posta (alıcılar birbirini görmesin); Resend saniyede 2 istek sınırı
   for (const to of emails) {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -118,7 +125,7 @@ async function main() {
     else console.error(`Gönderilemedi (${r.status}): ${(await r.text()).slice(0, 200)}`);
     await new Promise((res) => setTimeout(res, 600));
   }
-  console.log(`${emails.length} abone, ${sent} e-posta gönderildi`);
+  return sent;
 }
 
 main().catch((e) => {
