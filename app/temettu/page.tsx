@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import DividendLeaders from "@/components/DividendLeaders";
 import DividendsTable from "@/components/DividendsTable";
-import { getDividends } from "@/lib/dividends";
+import { dividendPresets, getDividends } from "@/lib/dividends";
 
 export const metadata: Metadata = {
   title: "Temettü Takvimi",
@@ -20,7 +21,10 @@ export default function DividendsPage() {
         </p>
       </div>
       {items.length > 0 ? (
-        <DividendsTable items={items} today={today} />
+        <>
+          <DividendLeaders items={dividendPresets()} />
+          <DividendsTable items={items} today={today} />
+        </>
       ) : (
         <div className="card p-8 text-center text-sm text-muted">Temettü verisi henüz yüklenmedi.</div>
       )}

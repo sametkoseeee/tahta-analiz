@@ -52,3 +52,44 @@ create policy "fiyatlar herkese açık" on public.prices for select using (true)
 drop policy if exists "kendi abonelikleri" on public.push_subscriptions;
 create policy "kendi abonelikleri" on public.push_subscriptions
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Portföyüm: üyenin elindeki hisseler (lot ve pay başına ortalama maliyet)
+create table if not exists public.portfolio (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  code text not null check (code ~ '^[A-Z0-9]{2,8}$'),
+  lots numeric not null check (lots > 0),
+  cost numeric not null check (cost >= 0),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, code)
+);
+alter table public.portfolio enable row level security;
+drop policy if exists "kendi portföyü" on public.portfolio;
+create policy "kendi portföyü" on public.portfolio
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Fiyat alarmları (scripts/alarm_push.mjs seans içinde 15 dakikada bir kontrol eder)
+create table if not exists public.price_alerts (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  code text not null check (code ~ '^[A-Z0-9]{2,8}$'),
+  direction text not null check (direction in ('above', 'below')),
+  price numeric not null check (price > 0),
+  created_at timestamptz not null default now(),
+  triggered_at timestamptz,
+  triggered_price numeric
+);
+create index if not exists price_alerts_open_idx on public.price_alerts (code) where triggered_at is null;
+alter table public.price_alerts enable row level security;
+drop policy if exists "kendi alarmları" on public.price_alerts;
+create policy "kendi alarmları" on public.price_alerts
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Haftalık e-posta bülteni: yalnızca açıkça isteyen üyeler (scripts/weekly_bulletin.mjs)
+create table if not exists public.newsletter (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table public.newsletter enable row level security;
+drop policy if exists "kendi bülten tercihi" on public.newsletter;
+create policy "kendi bülten tercihi" on public.newsletter
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

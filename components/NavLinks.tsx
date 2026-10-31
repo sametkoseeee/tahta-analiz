@@ -14,8 +14,10 @@ const LINKS = [
   { href: "/viop", label: "VİOP" },
   { href: "/tedbirli-hisseler", label: "Tedbirli" },
   { href: "/sermaye-artirimi", label: "Sermaye Artırımı" },
+  { href: "/halka-arz", label: "Halka Arz" },
   { href: "/endeksler", label: "Endeksler" },
   { href: "/hesaplama", label: "Hesaplama" },
+  { href: "/portfoy", label: "Portföyüm" },
   { href: "/izleme-listesi", label: "İzleme Listesi" },
 ];
 

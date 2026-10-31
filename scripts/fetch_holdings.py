@@ -46,7 +46,7 @@ DAYS = 75  # aylık rapor ay bitiminden ~10 gün sonra geliyor; son iki ayın ra
 BLOCK = 7
 FRESH_DAYS = 14
 MAX_NEW = 60
-TOP = 10
+FORMAT = 2  # 1: yalnız ilk 10 hisse, 2: tüm hisseler
 
 ATTACH = re.compile(r'objId\\?"?:\\?"([0-9a-f]{32})\\?",\\?"fileName\\?":\\?"([^"\\]+)')
 
@@ -166,7 +166,8 @@ def parse_pdf(data: bytes, tickers: set[str]) -> dict | None:
     # Okuma hatası (yanlış toplam değer, işlem dökümünden gelen tekrarlar) şüphesi: kullanma
     if not items or total > 110 or total < 10 or items[0][1] > 40:
         return None
-    return {"total": total, "count": len(items), "items": [{"code": c, "pct": p} for c, p in items[:TOP]]}
+    # Tüm hisseler saklanır: fon sayfası ilk TOP'u, hisse sayfası "bu hisseyi tutan fonlar"ı gösterir
+    return {"total": total, "count": len(items), "items": [{"code": c, "pct": p} for c, p in items if p >= 0.01]}
 
 
 def download(idx: int) -> bytes | None:
@@ -210,10 +211,14 @@ def main() -> None:
         if cur is None or (r["year"], r["period"], r["idx"]) > (cur["year"], cur["period"], cur["idx"]):
             latest[r["code"]] = r
 
-    todo = [r for r in latest.values() if parsed.get(r["code"], {}).get("idx") != r["idx"]]
-    print(f"{len(todo)} yeni rapor, bu çalıştırmada en fazla {MAX_NEW}", flush=True)
+    # Önce yeni dönem raporları, sonra eski biçimde (yalnız ilk 10 hisse) saklanmış olanlar yeniden okunur
+    new = [r for r in latest.values() if parsed.get(r["code"], {}).get("idx") != r["idx"]]
+    old = [r for r in latest.values() if r not in new and "items" in parsed[r["code"]]
+           and parsed[r["code"]].get("v") != FORMAT]
+    todo = new + old
+    print(f"{len(new)} yeni, {len(old)} yeniden okunacak rapor; bu çalıştırmada en fazla {MAX_NEW}", flush=True)
     for r in todo[:MAX_NEW]:
-        rec = {"idx": r["idx"], "period": f"{r['year']}-{r['period']:02d}"}
+        rec = {"idx": r["idx"], "period": f"{r['year']}-{r['period']:02d}", "v": FORMAT}
         try:
             pdf = download(r["idx"])
             res = parse_pdf(pdf, tickers) if pdf else None

@@ -82,6 +82,12 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: python -u scripts/fetch_dividends.py
+      - name: Halka arzları çek (KAP)
+        # Yılda ~60 bildirim; açılanlar önbellekte, her akşam yalnız yeniler açılır
+        if: github.event_name != 'push' || hashFiles('data/ipos.json') == ''
+        continue-on-error: true
+        timeout-minutes: 10
+        run: python -u scripts/fetch_ipos.py
       - name: Hisse fonlarının portföylerini çek (KAP)
         # Aylık portföy raporlarının PDF'leri; çalıştırma başına en fazla 60 yeni rapor (~12 dk)
         if: github.event_name != 'push' || hashFiles('data/holdings.json') == ''
@@ -110,6 +116,18 @@ jobs:
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           NEXT_PUBLIC_CF_BEACON: ${{ secrets.NEXT_PUBLIC_CF_BEACON }}
+      - name: Haftalık bülteni gönder (cuma)
+        # Yalnızca akşam çalıştırmasında; betik cuma dışındaki günlerde bir şey yapmaz. RESEND_API_KEY yoksa atlanır.
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          if [ -z "$RESEND_API_KEY" ]; then echo "RESEND_API_KEY tanımlı değil, bülten atlandı"; exit 0; fi
+          node --no-warnings scripts/weekly_bulletin.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       - name: Cloudflare Pages'e yükle
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

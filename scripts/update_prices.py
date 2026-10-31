@@ -56,6 +56,9 @@ def fetch_quotes(codes):
             continue
         price = num(closes.iloc[-1])
         prev = num(closes.iloc[-2]) if len(closes) > 1 else None
+        # Bedelsiz / bölünme günü Yahoo önceki kapanışı düzeltmeden verebilir (günlük sınır %10)
+        if price and prev and not 0.8 <= price / prev <= 1.25:
+            prev = None
         if price is None:
             continue
         vol = num(df[sym]["Volume"].dropna().iloc[-1]) if not df[sym]["Volume"].dropna().empty else None

@@ -369,6 +369,18 @@ def previous_group(code: str):
         return None
 
 
+def adjust_splits(prices: list[dict]) -> list[dict]:
+    """Yahoo bedelsiz / bölünmeyi bazen geç işliyor: o gün fiyat ~%90 düşmüş görünür. BIST'te günlük
+    fiyat sınırı %10 olduğundan bir günde %20'den büyük sıçrama şirket işlemidir; öncesi o oranla düzeltilir."""
+    for i in range(len(prices) - 1, 0, -1):
+        prev, cur = prices[i - 1]["c"], prices[i]["c"]
+        r = cur / prev if prev else 1
+        if r < 0.8 or r > 1.25:
+            for p in prices[:i]:
+                p["c"] = round(p["c"] * r, 4)
+    return prices
+
+
 def fetch(code: str):
     t = yf.Ticker(f"{code}.IS")
     info = t.info or {}
@@ -382,6 +394,7 @@ def fetch(code: str):
             c = clean(r["Close"])
             if c is not None:
                 prices.append({"d": idx.strftime("%Y-%m-%d"), "c": round(c, 4), "v": int(clean(r["Volume"]) or 0)})
+    adjust_splits(prices)
 
     # Mali tablolar: önce İş Yatırım (2016'dan bugüne, TL), olmazsa Yahoo (son 5–6 çeyrek)
     try:

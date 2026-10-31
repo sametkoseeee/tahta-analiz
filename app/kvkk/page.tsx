@@ -58,8 +58,11 @@ export default function KvkkPage() {
             </tr>
             <tr>
               <td>Kullanım tercihleri</td>
-              <td>İzleme listesine eklediğiniz hisse ve fonlar</td>
-              <td>İzleme listesini kullanırken</td>
+              <td>
+                İzleme listesine eklediğiniz hisse ve fonlar; Portföyüm&apos;e girdiğiniz hisse, lot ve maliyet bilgileri;
+                fiyat alarmlarınız; e-posta bülteni tercihiniz
+              </td>
+              <td>İzleme listesi, Portföyüm, fiyat alarmı ve bülten özelliklerini kullanırken</td>
             </tr>
             <tr>
               <td>Bildirim aboneliği</td>
@@ -92,6 +95,8 @@ export default function KvkkPage() {
         <li>Üyelik hesabını oluşturmak, e-posta adresini doğrulamak, oturum açmayı ve şifre sıfırlamayı sağlamak,</li>
         <li>İzleme listenizi saklamak ve tüm cihazlarınızda aynı şekilde göstermek,</li>
         <li>İzlediğiniz şirketler KAP&apos;ta bildirim yayımladığında size anlık bildirim göndermek (yalnızca açtıysanız),</li>
+        <li>Portföyünüzü ve fiyat alarmlarınızı saklamak, alarm fiyatına gelindiğinde size anlık bildirim göndermek,</li>
+        <li>Açıkça abone olduysanız haftalık e-posta bültenini göndermek,</li>
         <li>Sitenin ve kullanıcıların güvenliğini sağlamak, kötüye kullanımı önlemek,</li>
         <li>Yasal yükümlülükleri yerine getirmek ve yetkili kurumların talep etmesi hâlinde bilgi vermek.</li>
       </ul>
@@ -100,8 +105,8 @@ export default function KvkkPage() {
       <p>Kişisel verileriniz KVKK&apos;nın 5. maddesinin 2. fıkrasında yer alan şu sebeplere dayanılarak işlenir:</p>
       <ul className={list}>
         <li>
-          <strong>(c)</strong> Üyelik sözleşmesinin kurulması ve ifası için gerekli olması (hesap, izleme listesi ve
-          bildirim hizmetleri),
+          <strong>(c)</strong> Üyelik sözleşmesinin kurulması ve ifası için gerekli olması (hesap, izleme listesi,
+          portföy, fiyat alarmı, bildirim ve bülten hizmetleri),
         </li>
         <li>
           <strong>(ç)</strong> Veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi (ör. 5651 sayılı Kanun kapsamındaki
@@ -132,7 +137,7 @@ export default function KvkkPage() {
           <tbody>
             <tr>
               <td>Supabase</td>
-              <td>Üyelik ve veritabanı (izleme listesi, bildirim abonelikleri)</td>
+              <td>Üyelik ve veritabanı (izleme listesi, portföy, fiyat alarmları, bildirim ve bülten abonelikleri)</td>
               <td>Avrupa</td>
             </tr>
             <tr>
@@ -142,7 +147,7 @@ export default function KvkkPage() {
             </tr>
             <tr>
               <td>Resend</td>
-              <td>Doğrulama ve şifre sıfırlama e-postalarının gönderilmesi</td>
+              <td>Doğrulama ve şifre sıfırlama e-postalarının, abone olduysanız haftalık bültenin gönderilmesi</td>
               <td>İrlanda (AB)</td>
             </tr>
             <tr>
@@ -161,16 +166,18 @@ export default function KvkkPage() {
       </p>
       <p className="mt-3">
         Sitedeki piyasa verileri (KAP, TEFAS, İş Yatırım, Yahoo Finance) herkese açık kaynaklardan alınır; bu kaynaklarla
-        sizinle ilgili hiçbir veri paylaşılmaz. E-posta adresiniz ve izleme listeniz sitede başkalarına gösterilmez.
+        sizinle ilgili hiçbir veri paylaşılmaz. E-posta adresiniz, izleme listeniz ve portföyünüz sitede başkalarına gösterilmez.
       </p>
 
       <h2 className={h2}>7. Ne kadar süre saklıyoruz?</h2>
       <ul className={list}>
         <li>
-          Hesap verileri ve izleme listeniz, hesabınız açık olduğu sürece saklanır. Hesabınız silindiğinde e-posta
-          adresiniz, izleme listeniz ve bildirim abonelikleriniz de silinir.
+          Hesap verileri, izleme listeniz, portföyünüz ve fiyat alarmlarınız, hesabınız açık olduğu sürece saklanır.
+          Hesabınız silindiğinde e-posta adresiniz, izleme listeniz, portföyünüz, alarmlarınız ve abonelikleriniz de
+          silinir.
         </li>
         <li>Bildirim aboneliği, bildirimleri kapattığınızda ya da tarayıcınız aboneliği iptal ettiğinde silinir.</li>
+        <li>Bülten aboneliği, Portföyüm sayfasından abonelikten çıktığınızda silinir.</li>
         <li>İşlem güvenliği kayıtları, ilgili mevzuatın öngördüğü süre boyunca saklanır ve sonra silinir.</li>
       </ul>
 

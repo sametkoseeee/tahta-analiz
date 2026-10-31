@@ -25,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/viop", 0.7),
     page("/tedbirli-hisseler", 0.7),
     page("/sermaye-artirimi", 0.8),
+    page("/halka-arz", 0.8),
     page("/endeksler", 0.8),
     page("/hesaplama", 0.6, "weekly"),
     page("/karsilastir", 0.6, "weekly"),

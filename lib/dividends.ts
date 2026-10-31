@@ -24,6 +24,15 @@ export type Dividend = {
   price: number | null;
 };
 
+/** Son 12 ayda ödenmiş ya da ödenecek nakit kâr payları (temettü geliri hesaplayıcı, verim sıralaması) */
+export function dividendPresets(): { code: string; name: string; price: number | null; gross: number; net: number; payDate: string | null }[] {
+  const yearAgo = new Date(Date.now() - 365 * 86400_000).toISOString().slice(0, 10);
+  return getDividends()
+    .items.filter((d) => d.gross && d.gross > 0 && d.status !== "Dağıtılmayacak" && (!d.payDate || d.payDate >= yearAgo))
+    .map((d) => ({ code: d.code, name: d.name, price: d.price, gross: d.gross!, net: d.net ?? d.gross!, payDate: d.payDate }))
+    .sort((a, b) => a.code.localeCompare(b.code, "tr"));
+}
+
 export function getDividends(): { updatedAt: string | null; items: Dividend[] } {
   if (!fs.existsSync(FILE)) return { updatedAt: null, items: [] };
   const raw = JSON.parse(fs.readFileSync(FILE, "utf-8")) as { updatedAt: string; items: Omit<Dividend, "name" | "price">[] };

@@ -28,7 +28,8 @@ function Movers({ title, list }: { title: string; list: CompanySummary[] }) {
 /** Ana sayfa: piyasa özeti, günün hareketlileri ve hisse listesi (güncel fiyatlarla) */
 export default function MarketOverview({ companies: base }: { companies: CompanySummary[] }) {
   const companies = useLiveCompanies(base);
-  const withChange = companies.filter((c) => c.metrics.change != null);
+  // Günlük sınır %10: bundan çok büyük "değişim" düzeltilmemiş bedelsiz / bölünmedir, listeye alınmaz
+  const withChange = companies.filter((c) => c.metrics.change != null && Math.abs(c.metrics.change) <= 0.25);
   const byChange = [...withChange].sort((a, b) => b.metrics.change! - a.metrics.change!);
   const gainers = byChange.slice(0, 5);
   const losers = byChange.slice(-5).reverse();

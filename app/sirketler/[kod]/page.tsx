@@ -6,6 +6,8 @@ import FinancialCharts from "@/components/FinancialCharts";
 import NewsList from "@/components/NewsList";
 import PriceChart from "@/components/PriceChart";
 import Statements from "@/components/Statements";
+import StockHolders from "@/components/StockHolders";
+import { getStockHolders } from "@/lib/holdings";
 import WatchButton from "@/components/WatchButton";
 import { getCompany, getIndex } from "@/lib/data";
 import { num } from "@/lib/format";
@@ -32,6 +34,7 @@ export default async function CompanyPage({ params }: Props) {
   const m = c.metrics;
   const measure = getActiveMeasure(c.code);
   const capital = getOpenCapital(c.code);
+  const holders = getStockHolders(c.code);
   const fin = { code: c.code, financialCurrency: c.financialCurrency, statements: c.statements };
   return (
     <div className="space-y-6">
@@ -46,6 +49,12 @@ export default async function CompanyPage({ params }: Props) {
               className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
             >
               Karşılaştır
+            </Link>
+            <Link
+              href={`/portfoy?alarm=${c.code}`}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
+            >
+              Fiyat alarmı
             </Link>
             <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{c.sector}</span>
           </div>
@@ -95,6 +104,8 @@ export default async function CompanyPage({ params }: Props) {
       </section>
 
       <RatioGroups code={c.code} metrics={m} />
+
+      {holders.length > 0 && <StockHolders code={c.code} holders={holders} />}
 
       <FinancialCharts company={fin} />
 
