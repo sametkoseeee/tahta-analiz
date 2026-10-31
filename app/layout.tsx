@@ -51,17 +51,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <span>Tahta Analiz</span>
               </Link>
               <div className="ml-auto flex shrink-0 items-center gap-2 lg:order-2 lg:ml-0">
-                {/* Menü dolu: sözlük üst satırda (telefonda yer yok; orada sayfa altındaki bağlantı) */}
+                {/* Menü dolu: sözlük üst satırda; telefonda yer dar olduğundan yalnızca simge */}
                 <Link
                   href="/sozluk"
                   title="Borsa Sözlüğü"
-                  className="hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-muted hover:bg-surface-2 hover:text-text sm:flex"
+                  aria-label="Borsa Sözlüğü"
+                  className="flex items-center gap-1.5 rounded-md px-1.5 py-1.5 text-sm text-muted hover:bg-surface-2 hover:text-text sm:px-2"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
                     <path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 21.5v-2Z" strokeLinejoin="round" />
                     <path d="M8 7h7M8 11h5" strokeLinecap="round" />
                   </svg>
-                  <span>Sözlük</span>
+                  <span className="hidden sm:inline">Sözlük</span>
                 </Link>
                 <ThemeToggle />
                 <NewsBell />
