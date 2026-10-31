@@ -51,3 +51,6 @@ __pycache__/
 
 # Cloudflare wrangler yerel dosyaları
 .wrangler/
+
+# Tanıtım görselleri (yerel)
+/tanitim/
