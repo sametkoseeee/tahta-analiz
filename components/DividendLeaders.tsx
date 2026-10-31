@@ -27,9 +27,9 @@ export default function DividendLeaders({ items }: { items: (DividendPreset & { 
           Temettü gelirini hesapla →
         </Link>
       </div>
-      <ol className="grid gap-x-8 gap-y-1 md:grid-cols-2">
+      <ol className="grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
         {top.map((d, i) => (
-          <li key={d.code} className="flex items-baseline gap-3 border-b border-border py-1.5 text-sm last:border-0 md:[&:nth-last-child(2)]:border-0">
+          <li key={d.code} className="flex min-w-0 items-baseline gap-3 border-b border-border py-1.5 text-sm last:border-0 md:[&:nth-last-child(2)]:border-0">
             <span className="w-5 shrink-0 text-right text-xs text-muted tabular">{i + 1}</span>
             <Link href={`/sirketler/${d.code}`} className="w-14 shrink-0 font-semibold text-accent hover:underline">
               {d.code}
