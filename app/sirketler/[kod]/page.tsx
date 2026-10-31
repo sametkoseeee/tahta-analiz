@@ -50,12 +50,6 @@ export default async function CompanyPage({ params }: Props) {
             >
               Karşılaştır
             </Link>
-            <Link
-              href={`/portfoy?alarm=${c.code}`}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface-2"
-            >
-              Fiyat alarmı
-            </Link>
             <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{c.sector}</span>
           </div>
           {c.indices && c.indices.length > 0 && (

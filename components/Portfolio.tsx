@@ -9,9 +9,8 @@ import { getSupabase } from "@/lib/supabase/client";
 import { parse } from "./CapitalCalculator";
 import type { DividendPreset } from "./DividendIncomeCalculator";
 import NewsletterToggle from "./NewsletterToggle";
-import PriceAlerts from "./PriceAlerts";
 
-/** Portföy ve alarm formlarında seçilebilecek hisseler */
+/** Portföy formunda seçilebilecek hisseler */
 export type Quote = { code: string; name: string; price: number | null; change: number | null };
 
 type Holding = { code: string; lots: number; cost: number };
@@ -25,7 +24,7 @@ function SignInPrompt() {
       <h2 className="mt-2 text-lg font-semibold">Portföyüm üyelere özel</h2>
       <p className="mt-2 text-sm text-muted">
         Ücretsiz üye ol; elindeki hisseleri ve maliyetini gir, güncel değerini, kâr / zararını ve alacağın temettüyü tek
-        yerde gör. Fiyat alarmı kur, hisse istediğin fiyata gelince bildirim al.
+        yerde gör.
       </p>
       <div className="mt-5 flex justify-center gap-2">
         <Link href="/giris?kayit=1&next=/portfoy" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
@@ -246,8 +245,6 @@ export default function Portfolio({ quotes: base, dividends }: { quotes: Quote[]
           </table>
         </div>
       </section>
-
-      <PriceAlerts quotes={base} />
 
       <NewsletterToggle />
 

@@ -5,7 +5,7 @@ import { dividendPresets } from "@/lib/dividends";
 
 export const metadata: Metadata = {
   title: "Portföyüm",
-  description: "Hisselerini ve maliyetini gir; portföy değeri, kâr / zarar, beklenen temettü ve fiyat alarmları",
+  description: "Hisselerini ve maliyetini gir; portföy değeri, kâr / zarar ve beklenen temettü",
 };
 
 export default function PortfolioPage() {
@@ -16,7 +16,7 @@ export default function PortfolioPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Portföyüm</h1>
-        <p className="mt-1 text-sm text-muted">Hisselerin, güncel değeri, kâr / zararın, beklenen temettün ve fiyat alarmların.</p>
+        <p className="mt-1 text-sm text-muted">Hisselerin, güncel değeri, kâr / zararın ve beklenen temettün.</p>
       </div>
       <Portfolio quotes={quotes} dividends={dividendPresets()} />
     </div>

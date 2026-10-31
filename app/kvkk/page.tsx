@@ -60,9 +60,9 @@ export default function KvkkPage() {
               <td>Kullanım tercihleri</td>
               <td>
                 İzleme listesine eklediğiniz hisse ve fonlar; Portföyüm&apos;e girdiğiniz hisse, lot ve maliyet bilgileri;
-                fiyat alarmlarınız; e-posta bülteni tercihiniz
+                e-posta bülteni tercihiniz
               </td>
-              <td>İzleme listesi, Portföyüm, fiyat alarmı ve bülten özelliklerini kullanırken</td>
+              <td>İzleme listesi, Portföyüm ve bülten özelliklerini kullanırken</td>
             </tr>
             <tr>
               <td>Bildirim aboneliği</td>
@@ -95,7 +95,7 @@ export default function KvkkPage() {
         <li>Üyelik hesabını oluşturmak, e-posta adresini doğrulamak, oturum açmayı ve şifre sıfırlamayı sağlamak,</li>
         <li>İzleme listenizi saklamak ve tüm cihazlarınızda aynı şekilde göstermek,</li>
         <li>İzlediğiniz şirketler KAP&apos;ta bildirim yayımladığında size anlık bildirim göndermek (yalnızca açtıysanız),</li>
-        <li>Portföyünüzü ve fiyat alarmlarınızı saklamak, alarm fiyatına gelindiğinde size anlık bildirim göndermek,</li>
+        <li>Portföyünüzü saklamak ve tüm cihazlarınızda göstermek,</li>
         <li>Açıkça abone olduysanız haftalık e-posta bültenini göndermek,</li>
         <li>Sitenin ve kullanıcıların güvenliğini sağlamak, kötüye kullanımı önlemek,</li>
         <li>Yasal yükümlülükleri yerine getirmek ve yetkili kurumların talep etmesi hâlinde bilgi vermek.</li>
@@ -106,7 +106,7 @@ export default function KvkkPage() {
       <ul className={list}>
         <li>
           <strong>(c)</strong> Üyelik sözleşmesinin kurulması ve ifası için gerekli olması (hesap, izleme listesi,
-          portföy, fiyat alarmı, bildirim ve bülten hizmetleri),
+          portföy, bildirim ve bülten hizmetleri),
         </li>
         <li>
           <strong>(ç)</strong> Veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi (ör. 5651 sayılı Kanun kapsamındaki
@@ -137,7 +137,7 @@ export default function KvkkPage() {
           <tbody>
             <tr>
               <td>Supabase</td>
-              <td>Üyelik ve veritabanı (izleme listesi, portföy, fiyat alarmları, bildirim ve bülten abonelikleri)</td>
+              <td>Üyelik ve veritabanı (izleme listesi, portföy, bildirim ve bülten abonelikleri)</td>
               <td>Avrupa</td>
             </tr>
             <tr>
@@ -172,9 +172,8 @@ export default function KvkkPage() {
       <h2 className={h2}>7. Ne kadar süre saklıyoruz?</h2>
       <ul className={list}>
         <li>
-          Hesap verileri, izleme listeniz, portföyünüz ve fiyat alarmlarınız, hesabınız açık olduğu sürece saklanır.
-          Hesabınız silindiğinde e-posta adresiniz, izleme listeniz, portföyünüz, alarmlarınız ve abonelikleriniz de
-          silinir.
+          Hesap verileri, izleme listeniz ve portföyünüz, hesabınız açık olduğu sürece saklanır. Hesabınız silindiğinde
+          e-posta adresiniz, izleme listeniz, portföyünüz ve abonelikleriniz de silinir.
         </li>
         <li>Bildirim aboneliği, bildirimleri kapattığınızda ya da tarayıcınız aboneliği iptal ettiğinde silinir.</li>
         <li>Bülten aboneliği, Portföyüm sayfasından abonelikten çıktığınızda silinir.</li>
