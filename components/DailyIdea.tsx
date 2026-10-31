@@ -12,10 +12,7 @@ export default function DailyIdea() {
   const idea = IDEAS[i];
   const go = (d: number) => setI((x) => ((x ?? 0) + d + IDEAS.length) % IDEAS.length);
   return (
-    <section className="card relative overflow-hidden p-4 sm:p-5">
-      <div className="pointer-events-none absolute -right-6 -top-10 text-[140px] leading-none text-accent/10" aria-hidden>
-        “
-      </div>
+    <section className="card p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-accent">Günün Ekonomi Fikri</h2>
         <div className="flex items-center gap-1 text-xs text-muted">

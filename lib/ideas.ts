@@ -199,7 +199,6 @@ export const IDEAS: Idea[] = [
     who: "Harry Markowitz", role: "Nobel Ekonomi Ödülü 1990, portföy teorisi", title: "Çeşitlendirme bedava öğle yemeğidir",
     body: "Markowitz, birlikte hareket etmeyen varlıkları bir arada tutmanın, getiriden fazla vazgeçmeden riski azalttığını gösterdi.",
     example: "Tüm parayı tek bir sektöre yatırmak yerine farklı sektörlere ve varlıklara dağıtmak, tek bir kötü haberin etkisini azaltır.",
-    link: { href: "/portfoy", label: "Portföyüm" },
   },
   {
     who: "Peter Lynch", role: "Fon yöneticisi, Fidelity Magellan", title: "Bildiğin şeye yatırım yap",
