@@ -23,6 +23,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      # Gece güncellemesinin verisi: önceki günün resmi kapanışı buradan alınır (değişim yüzdesi için)
+      - uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: veri-fiyat-yok
+          restore-keys: veri-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

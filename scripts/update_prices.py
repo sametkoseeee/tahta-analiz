@@ -35,13 +35,20 @@ def num(v):
     return None if math.isnan(f) or math.isinf(f) else f
 
 
+def stored_closes(code):
+    """Gece güncellemesinin kaydettiği resmi günlük kapanışlar ({tarih: kapanış}); yoksa boş."""
+    path = DATA / "companies" / f"{code}.json"
+    try:
+        return {p["d"]: p["c"] for p in json.loads(path.read_text(encoding="utf-8")).get("prices", [])[-10:]}
+    except (OSError, ValueError, KeyError, TypeError):
+        return {}
+
+
 def fetch_quotes(codes):
-    # Saatlik çubuklar: Yahoo'nun günlük verisinde bazen koca bir gün eksik oluyor (ör. 2 Kasım 2026 hiç yoktu;
-    # değişim cuma kapanışına göre hesaplandı). Saatlik veride o gün var; önceki kapanış = önceki günün son çubuğu.
     df = yf.download(
         [f"{c}.IS" for c in codes],
         period="5d",
-        interval="60m",
+        interval="1d",
         group_by="ticker",
         auto_adjust=False,
         threads=True,
@@ -53,20 +60,26 @@ def fetch_quotes(codes):
         sym = f"{code}.IS"
         if sym not in df.columns.get_level_values(0):
             continue
-        bars = df[sym].dropna(subset=["Close"])
-        if bars.empty:
+        closes = df[sym]["Close"].dropna()
+        if closes.empty:
             continue
-        days = bars.index.date
-        today = bars[days == days[-1]]
-        before = bars[days < days[-1]]
-        price = num(today["Close"].iloc[-1])
-        prev = num(before["Close"].iloc[-1]) if not before.empty else None
+        price = num(closes.iloc[-1])
+        day = closes.index[-1].strftime("%Y-%m-%d")
+        # Önceki kapanış gece verisinden: Yahoo'nun bu toplu isteğinde bazen koca bir gün eksik oluyor
+        # (2 Kasım 2026 hiç yoktu, değişim cuma kapanışına göre çıktı) ve saatlik çubuklar resmi kapanışı tutmuyor.
+        # Gece verisi yoksa ya da eskiyse Yahoo'nun bir önceki çubuğuna düşülür.
+        older = {d: c for d, c in stored_closes(code).items() if d < day}
+        yahoo_prev_day = closes.index[-2].strftime("%Y-%m-%d") if len(closes) > 1 else ""
+        if older and max(older) >= yahoo_prev_day:
+            prev = num(older[max(older)])
+        else:
+            prev = num(closes.iloc[-2]) if len(closes) > 1 else None
         # Bedelsiz / bölünme günü Yahoo önceki kapanışı düzeltmeden verebilir (günlük sınır %10)
         if price and prev and not 0.8 <= price / prev <= 1.25:
             prev = None
         if price is None:
             continue
-        vol = num(today["Volume"].sum())
+        vol = num(df[sym]["Volume"].dropna().iloc[-1]) if not df[sym]["Volume"].dropna().empty else None
         rows.append({
             "code": code,
             "price": round(price, 4),
