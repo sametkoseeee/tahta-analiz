@@ -2,10 +2,15 @@ name: Seans içi fiyatlar
 
 # Seans boyunca (10:00–18:45 TSİ, hafta içi) 15 dakikada bir tüm hisselerin fiyatını
 # Yahoo'dan çekip Supabase'e yazar. Site güncel fiyatı oradan okur; yeniden build gerekmez.
-# GitHub zamanlanmış işleri yoğun saatlerde birkaç dakika gecikebilir.
+# GitHub zamanlanmış işleri saat başı ve çeyreklerde (:00, :15) yoğunluktan sık sık atlar ya da çok gecikir;
+# bu yüzden çeyrek dışı dakikalar seçildi ve iki ayrı zamanlama var (biri atlanırsa diğeri yetişir).
 on:
   schedule:
-    - cron: "*/15 7-15 * * 1-5" # UTC 07:00–15:45 = TSİ 10:00–18:45
+    - cron: "4,19,34,49 7-15 * * 1-5" # UTC 07:04–15:49 = TSİ 10:04–18:49
+    - cron: "11,41 7-15 * * 1-5"
+  push: # bu dosya değişince hemen bir kez çalışır
+    branches: [master]
+    paths: [.github/workflows/fiyat.yml]
   workflow_dispatch:
 
 concurrency:
