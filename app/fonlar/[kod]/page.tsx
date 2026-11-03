@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return f
     ? {
         title: `${f.code} · ${f.name}`,
-        description: `${f.name} fiyatı, getirileri ve büyüklüğü`,
+        description: `${f.code} · ${f.name} fon fiyatı, aylık ve yıllık getirileri, fon büyüklüğü ve fiyat geçmişi.`,
         alternates: { canonical: `/fonlar/${f.code}` },
       }
     : { title: "Bulunamadı" };
