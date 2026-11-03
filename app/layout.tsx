@@ -25,6 +25,7 @@ export const metadata: Metadata = {
   openGraph: { siteName: "Tahta Analiz", locale: "tr_TR", type: "website" },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100"),
   icons: { icon: "/icon.png", apple: "/icon.png" },
+  appleWebApp: { capable: true, title: "Tahta Analiz", statusBarStyle: "black-translucent" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

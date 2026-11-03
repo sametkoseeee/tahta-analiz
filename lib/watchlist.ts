@@ -51,18 +51,36 @@ function subscribe(cb: () => void) {
   };
 }
 
-/** Giriş yapılmışsa değişikliği veritabanına da yansıtır (arka planda; hata olursa bir sonraki girişte birleşir) */
-async function syncRemote(code: string, add: boolean) {
+/**
+ * Değişikliği veritabanına yazar; başarılıysa true. Uzun süre açık kalan sekmede (telefonda sık olur) oturum
+ * anahtarının süresi dolmuş olabilir: ilk deneme başarısızsa oturum yenilenip bir kez daha denenir.
+ */
+async function syncRemote(code: string, add: boolean): Promise<boolean> {
   const supabase = getSupabase();
-  if (!supabase) return;
+  if (!supabase) return false;
   const { data } = await supabase.auth.getSession();
   const userId = data.session?.user.id;
-  if (!userId) return;
-  if (add) await supabase.from("watchlist").upsert({ user_id: userId, code });
-  else await supabase.from("watchlist").delete().eq("user_id", userId).eq("code", code);
+  if (!userId) return false;
+  const run = () =>
+    add
+      ? supabase.from("watchlist").upsert({ user_id: userId, code }, { onConflict: "user_id,code", ignoreDuplicates: true })
+      : supabase.from("watchlist").delete().eq("user_id", userId).eq("code", code);
+  let { error } = await run();
+  if (error) {
+    await supabase.auth.refreshSession();
+    ({ error } = await run());
+  }
+  return !error;
 }
 
-/** Girişte: hesaptaki listeyi tarayıcıya al (tarayıcıda kalmış eski liste hesaba karışmaz) */
+/** Kaydedilemezse ekranda kalan değişiklik geri alınır ve kullanıcıya söylenir (sessizce kaybolmasın) */
+async function save(code: string, add: boolean, previous: string[]) {
+  if (await syncRemote(code, add)) return;
+  write(previous);
+  alert("İzleme listesi kaydedilemedi. Sayfayı yenileyip tekrar dene; sorun sürerse çıkış yapıp yeniden giriş yap.");
+}
+
+/** Girişte ve sekmeye geri dönüldüğünde: hesaptaki listeyi tarayıcıya al (başka cihazda yapılan değişiklikler de gelir) */
 export async function loadFromAccount() {
   const supabase = getSupabase();
   if (!supabase) return;
@@ -90,12 +108,12 @@ export function useWatchlist() {
       if (!user) return goToLogin();
       const add = !list.includes(code);
       write(add ? [...list, code] : list.filter((c) => c !== code));
-      void syncRemote(code, add);
+      void save(code, add, list);
     },
     remove: (code: string) => {
       if (!user) return;
       write(list.filter((c) => c !== code));
-      void syncRemote(code, false);
+      void save(code, false, list);
     },
   };
 }

@@ -65,6 +65,30 @@ function PushToggle() {
   );
 }
 
+/** iPadOS kendini Mac olarak tanıtır; dokunmatik ekranından ayırt edilir */
+function isIOS() {
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+/** iPhone/iPad'de Safari ve Chrome sekmesinde bildirim yok; Apple yalnızca Ana Ekran'a eklenmiş siteye izin verir */
+function IOSHint() {
+  return (
+    <div className="max-w-sm text-sm">
+      <div className="font-medium">iPhone&apos;da bildirim almak için</div>
+      <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-xs text-muted">
+        <li>
+          <b className="text-text">Paylaş</b> düğmesine (kare ve yukarı ok) dokun. Safari&apos;de altta ya da ⋯ menüsünde,
+          Chrome&apos;da adres çubuğunun sağında.
+        </li>
+        <li>
+          <b className="text-text">Ana Ekrana Ekle</b>&apos;yi seç.
+        </li>
+        <li>Ana ekrandaki Tahta Analiz simgesinden aç, giriş yap ve buradan bildirimleri aç.</li>
+      </ol>
+    </div>
+  );
+}
+
 /** Tarayıcı Web Push desteklemiyorsa: yalnızca site açıkken çalışan sekme içi bildirimler */
 function TabNotificationToggle() {
   const [on, setOn] = useState(false);
@@ -77,7 +101,7 @@ function TabNotificationToggle() {
     setDenied(notificationsSupported() && Notification.permission === "denied");
   }, []);
 
-  if (!supported) return <p className="text-xs text-muted">Bu tarayıcı bildirimleri desteklemiyor.</p>;
+  if (!supported) return isIOS() ? <IOSHint /> : <p className="text-xs text-muted">Bu tarayıcı bildirimleri desteklemiyor.</p>;
 
   return (
     <div className="flex flex-wrap items-center gap-3">
