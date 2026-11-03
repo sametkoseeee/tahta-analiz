@@ -21,6 +21,7 @@ import yfinance as yf
 from yfinance import EquityQuery
 
 from isyatirim import fetch_statements as isy_statements
+from names import TITLES_PATH, fix_name, load_vocab
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -110,6 +111,10 @@ def fetch_indices():
     if len(oids) > 400:
         KAP_OIDS_PATH.write_text(json.dumps(dict(sorted(oids.items())), indent=0), encoding="utf-8")
         print(f"{len(oids)} KAP şirket kimliği → {KAP_OIDS_PATH}")
+    # Resmi unvanlar: Yahoo'nun Türkçe harfsiz şirket adlarını düzeltmek için (names.py)
+    titles = dict(re.findall(r'"stockCode":"([A-Z0-9]+)","title":"([^"]*)"', body))
+    if len(titles) > 400:
+        TITLES_PATH.write_text(json.dumps(dict(sorted(titles.items())), ensure_ascii=False, indent=0), encoding="utf-8")
     out = {
         "updatedAt": datetime.now(timezone.utc).isoformat(),
         "indices": [
@@ -122,6 +127,21 @@ def fetch_indices():
     return out
 
 
+def fix_names(index):
+    """Yahoo'nun Türkçe harfsiz şirket adlarını KAP unvanlarına göre düzeltir (ağ isteği yok)."""
+    vocab = load_vocab()
+    if not vocab:
+        return
+    for code, c in index.items():
+        c["name"] = fix_name(c["name"], vocab)
+        path = COMPANIES_DIR / f"{code}.json"
+        if path.exists():
+            d = json.loads(path.read_text(encoding="utf-8"))
+            if d.get("name") and fix_name(d["name"], vocab) != d["name"]:
+                d["name"] = fix_name(d["name"], vocab)
+                path.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+
+
 def enrich(index):
     """Şirketlere endeks üyeliklerini ve BIST sektörünü ekler (Yahoo sektörü yedek olarak kalır)."""
     try:
@@ -129,8 +149,10 @@ def enrich(index):
     except Exception as e:  # noqa: BLE001
         print(f"KAP endeksleri alınamadı, eski dosya kullanılıyor: {e}")
         if not INDICES_PATH.exists():
+            fix_names(index)
             return
         data = json.loads(INDICES_PATH.read_text(encoding="utf-8"))
+    fix_names(index)
 
     by_code = {}
     for ix in data["indices"]:
@@ -540,6 +562,14 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     COMPANIES_DIR.mkdir(parents=True, exist_ok=True)
     index_path = DATA / "companies.json"
+
+    if "--names-only" in sys.argv:  # kod gönderiminde: önbellekteki veriye yalnızca ad düzeltmesi
+        out = json.loads(index_path.read_text(encoding="utf-8"))
+        index = {c["code"]: c for c in out["companies"]}
+        fix_names(index)
+        out["companies"] = sorted(index.values(), key=lambda c: c["code"])
+        index_path.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
+        return
 
     if "--indices-only" in sys.argv:
         out = json.loads(index_path.read_text(encoding="utf-8"))

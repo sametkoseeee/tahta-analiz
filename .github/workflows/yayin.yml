@@ -38,6 +38,9 @@ jobs:
         # Kod gönderiminde, önbellekte veri varsa yeniden çekme (hızlı yayın)
         if: github.event_name != 'push' || hashFiles('data/companies.json') == ''
         run: python -u scripts/fetch_data.py --refresh-list
+      - name: Şirket adlarındaki Türkçe harfleri düzelt
+        # Ağ isteği yok; kod gönderiminde önbellekten gelen veriye de uygulanır
+        run: python -u scripts/fetch_data.py --names-only
       - name: Fonları çek (TEFAS)
         # TEFAS'a ulaşılamazsa yayın durmasın; önceki günün fon verisi önbellekte kalır
         if: github.event_name != 'push' || hashFiles('data/funds.json') == ''
