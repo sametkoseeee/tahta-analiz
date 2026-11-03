@@ -8,9 +8,9 @@ on:
   schedule:
     - cron: "4,19,34,49 7-15 * * 1-5" # UTC 07:04–15:49 = TSİ 10:04–18:49
     - cron: "11,41 7-15 * * 1-5"
-  push: # bu dosya değişince hemen bir kez çalışır
+  push: # bu dosya ya da fiyat betiği değişince hemen bir kez çalışır
     branches: [master]
-    paths: [.github/workflows/fiyat.yml]
+    paths: [.github/workflows/fiyat.yml, scripts/update_prices.py]
   workflow_dispatch:
 
 concurrency:

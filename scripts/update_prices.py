@@ -36,10 +36,12 @@ def num(v):
 
 
 def fetch_quotes(codes):
+    # Saatlik çubuklar: Yahoo'nun günlük verisinde bazen koca bir gün eksik oluyor (ör. 2 Kasım 2026 hiç yoktu;
+    # değişim cuma kapanışına göre hesaplandı). Saatlik veride o gün var; önceki kapanış = önceki günün son çubuğu.
     df = yf.download(
         [f"{c}.IS" for c in codes],
         period="5d",
-        interval="1d",
+        interval="60m",
         group_by="ticker",
         auto_adjust=False,
         threads=True,
@@ -51,17 +53,20 @@ def fetch_quotes(codes):
         sym = f"{code}.IS"
         if sym not in df.columns.get_level_values(0):
             continue
-        closes = df[sym]["Close"].dropna()
-        if closes.empty:
+        bars = df[sym].dropna(subset=["Close"])
+        if bars.empty:
             continue
-        price = num(closes.iloc[-1])
-        prev = num(closes.iloc[-2]) if len(closes) > 1 else None
+        days = bars.index.date
+        today = bars[days == days[-1]]
+        before = bars[days < days[-1]]
+        price = num(today["Close"].iloc[-1])
+        prev = num(before["Close"].iloc[-1]) if not before.empty else None
         # Bedelsiz / bölünme günü Yahoo önceki kapanışı düzeltmeden verebilir (günlük sınır %10)
         if price and prev and not 0.8 <= price / prev <= 1.25:
             prev = None
         if price is None:
             continue
-        vol = num(df[sym]["Volume"].dropna().iloc[-1]) if not df[sym]["Volume"].dropna().empty else None
+        vol = num(today["Volume"].sum())
         rows.append({
             "code": code,
             "price": round(price, 4),
