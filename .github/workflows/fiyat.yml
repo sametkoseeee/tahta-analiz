@@ -4,7 +4,7 @@ name: Seans içi fiyatlar
 # Yahoo'dan çekip Supabase'e yazar. Site güncel fiyatı oradan okur; yeniden build gerekmez.
 # GitHub zamanlanmış işleri saat başı ve çeyreklerde (:00, :15) yoğunluktan sık sık atlar ya da çok gecikir;
 # bu yüzden çeyrek dışı dakikalar seçildi ve iki ayrı zamanlama var (biri atlanırsa diğeri yetişir).
-# Yine de sabahları bir saati aşan boşluklar oluyor (4 Kasım 2026: 10:00–10:50 arası hiç çalışmadı; 5 Kasım: 11:00e, 6 Kasım: 10:23e, 9 Kasım: 10:26ya kadar hiç çalışmadı).
+# Yine de sabahları bir saati aşan boşluklar oluyor (4 Kasım 2026: 10:00–10:50 arası hiç çalışmadı; 5 Kasım: 11:00e, 6 Kasım: 10:23e, 9 Kasım: 10:26ya kadar hiç çalışmadı; 13 Kasım: ilk çalışma 11:20, sonra 1 saat yine yok).
 on:
   schedule:
     - cron: "4,19,34,49 7-15 * * 1-5" # UTC 07:04–15:49 = TSİ 10:04–18:49
