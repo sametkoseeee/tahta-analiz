@@ -5,8 +5,12 @@ name: Seans içi fiyatlar
 # GitHub zamanlanmış işleri saat başı ve çeyreklerde (:00, :15) yoğunluktan sık sık atlar ya da çok gecikir;
 # bu yüzden çeyrek dışı dakikalar seçildi ve iki ayrı zamanlama var (biri atlanırsa diğeri yetişir).
 # Yine de sabahları bir saati aşan boşluklar oluyor (4 Kasım 2026: 10:00–10:50 arası hiç çalışmadı; 5 Kasım: 11:00e, 6 Kasım: 10:23e, 9 Kasım: 10:26ya kadar hiç çalışmadı; 13 Kasım: ilk çalışma 11:20, sonra 1 saat yine yok).
+# Bu yüzden iş kendi kendini zincirler: her çalışma bittiğinde ~10 dakika bekleyip bir sonrakini başlatır
+# (GitHub'ın kendi izniyle; ek anahtar gerekmez). Zinciri sabah başlatmak için seans öncesi üç zamanlama da var;
+# bunlar 09:58 TSİ'ye kadar bekleyip zinciri başlatır. Aynı anda iki zincir olmaz: yeni çalışma eskisini iptal eder.
 on:
   schedule:
+    - cron: "7 4,5,6 * * 1-5" # TSİ 07:07, 08:07, 09:07 — zinciri başlatır
     - cron: "4,19,34,49 7-15 * * 1-5" # UTC 07:04–15:49 = TSİ 10:04–18:49
     - cron: "11,41 7-15 * * 1-5"
   push: # bu dosya ya da fiyat betiği değişince hemen bir kez çalışır
@@ -18,10 +22,14 @@ concurrency:
   group: fiyat
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  actions: write # zincirin bir sonraki çalışmayı başlatabilmesi için
+
 jobs:
   guncelle:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 300 # sabah zinciri başlatan çalışma seans açılışına kadar bekleyebilir
     steps:
       - uses: actions/checkout@v4
       # Gece güncellemesinin verisi: önceki günün resmi kapanışı buradan alınır (değişim yüzdesi için)
@@ -40,3 +48,19 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Zincir: seans bitene kadar ~10 dakika sonra bir sonraki çalışmayı başlat (iptal edilen çalışma başlatmaz)
+      - name: Sıradaki çalışmayı kur
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          now=$(date -u +%s)
+          start=$(date -u -d "today 06:58" +%s)
+          end=$(date -u -d "today 15:45" +%s)
+          if [ "$(date -u +%u)" -gt 5 ] || [ "$now" -ge "$end" ]; then echo "Seans bitti, zincir duruyor"; exit 0; fi
+          target=$((now + 480))
+          [ "$target" -lt "$start" ] && target=$start
+          echo "$(( (target - now) / 60 )) dakika sonra sıradaki çalışma başlatılacak"
+          sleep $((target - now))
+          gh workflow run fiyat.yml --ref master
