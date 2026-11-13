@@ -1,0 +1,12 @@
+# Fiyat zamanlayıcısı: GitHub'ın kendi zamanlayıcısı sabahları saatlerce atlayabildiği için
+# seans boyunca 10 dakikada bir GitHub'daki "Seans içi fiyatlar" (fiyat.yml) işini başlatır.
+# Fiyatları yine GitHub çeker; bu Worker yalnızca düğmeye basar. Yayını .github/workflows/zamanlayici.yml yapar.
+# GH_TOKEN gizli değişkeni Cloudflare panelinden girilir (yalnızca bu deponun Actions yazma izni); yayınlar onu silmez.
+name = "tahta-fiyat-zamanlayici"
+main = "index.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+preview_urls = false
+
+[triggers]
+crons = ["*/10 7-15 * * 1-5"] # UTC 07:00–15:50 = TSİ 10:00–18:50, hafta içi
