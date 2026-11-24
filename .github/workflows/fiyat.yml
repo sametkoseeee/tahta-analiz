@@ -6,8 +6,11 @@ name: Seans içi fiyatlar
 # bu yüzden çeyrek dışı dakikalar seçildi ve iki ayrı zamanlama var (biri atlanırsa diğeri yetişir).
 # Yine de sabahları bir saati aşan boşluklar oluyor (4 Kasım 2026: 10:00–10:50 arası hiç çalışmadı; 5 Kasım: 11:00e, 6 Kasım: 10:23e, 9 Kasım: 10:26ya kadar hiç çalışmadı; 13 Kasım: ilk çalışma 11:20, sonra 1 saat yine yok).
 # Bu yüzden iş kendi kendini zincirler: her çalışma bittiğinde ~10 dakika bekleyip bir sonrakini başlatır
-# (GitHub'ın kendi izniyle; ek anahtar gerekmez). Zinciri sabah başlatmak için seans öncesi üç zamanlama da var;
-# bunlar 09:58 TSİ'ye kadar bekleyip zinciri başlatır. Aynı anda iki zincir olmaz: yeni çalışma eskisini iptal eder.
+# (GitHub'ın kendi izniyle; ek anahtar gerekmez). Aynı anda iki zincir olmaz: yeni çalışma eskisini iptal eder.
+# Zincir gece ve hafta sonu da durmaz: seans dışında fiyat çekmeden en fazla 5,5 saat uyuyup kendini yeniden başlatır
+# ve bir sonraki seans açılışına (09:58 TSİ) böyle ulaşır. Çünkü GitHub zamanlamaları saatlerce gecikebiliyor
+# (23 Kasım: sabah zinciri ancak 17:25'te başladı; 24 Kasım: öğlene kadar hiç çalışmadı). Zamanlamalar yalnızca
+# zincir koparsa yeniden başlatmak için duruyor.
 on:
   schedule:
     - cron: "7 4,5,6 * * 1-5" # TSİ 07:07, 08:07, 09:07 — zinciri başlatır
@@ -29,26 +32,37 @@ permissions:
 jobs:
   guncelle:
     runs-on: ubuntu-latest
-    timeout-minutes: 300 # sabah zinciri başlatan çalışma seans açılışına kadar bekleyebilir
+    timeout-minutes: 350 # seans dışında 5,5 saate kadar uyuyabilir (iş sınırı 6 saat)
     steps:
+      # Seans saatinde miyiz? (hafta içi 06:50–16:00 UTC; dosya değişince her zaman fiyat çekilir)
+      - id: saat
+        run: |
+          h=$(date -u +%H%M)
+          if [ "$(date -u +%u)" -le 5 ] && [ "$h" -ge 0650 ] && [ "$h" -lt 1600 ]; then echo "seans=true" >> "$GITHUB_OUTPUT"; else echo "seans=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/checkout@v4
+        if: steps.saat.outputs.seans == 'true' || github.event_name == 'push'
       # Gece güncellemesinin verisi: önceki günün resmi kapanışı buradan alınır (değişim yüzdesi için)
       - uses: actions/cache/restore@v4
+        if: steps.saat.outputs.seans == 'true' || github.event_name == 'push'
         with:
           path: data
           key: veri-fiyat-yok
           restore-keys: veri-
       - uses: actions/setup-python@v5
+        if: steps.saat.outputs.seans == 'true' || github.event_name == 'push'
         with:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: .github/workflows/fiyat.yml
       - run: pip install yfinance pandas requests
+        if: steps.saat.outputs.seans == 'true' || github.event_name == 'push'
       - run: python -u scripts/update_prices.py
+        if: steps.saat.outputs.seans == 'true' || github.event_name == 'push'
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      # Zincir: seans bitene kadar ~10 dakika sonra bir sonraki çalışmayı başlat (iptal edilen çalışma başlatmaz)
+      # Zincir: seansta ~10 dakika sonra, seans dışında bir sonraki açılışa doğru (en fazla 5,5 saat) uyuyup
+      # bir sonraki çalışmayı başlatır. İptal edilen çalışma başlatmaz (yerine geçen yeni çalışma zinciri sürdürür).
       - name: Sıradaki çalışmayı kur
         if: ${{ !cancelled() }}
         env:
@@ -56,11 +70,16 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           now=$(date -u +%s)
-          start=$(date -u -d "today 06:58" +%s)
-          end=$(date -u -d "today 15:45" +%s)
-          if [ "$(date -u +%u)" -gt 5 ] || [ "$now" -ge "$end" ]; then echo "Seans bitti, zincir duruyor"; exit 0; fi
-          target=$((now + 480))
-          [ "$target" -lt "$start" ] && target=$start
+          for d in 0 1 2 3 4 5 6 7; do
+            day=$(date -u -d "today +$d day" +%F)
+            [ "$(date -u -d "$day" +%u)" -gt 5 ] && continue
+            start=$(date -u -d "$day 06:58" +%s)
+            end=$(date -u -d "$day 15:45" +%s)
+            [ "$now" -lt "$end" ] && break
+          done
+          if [ "$now" -ge "$start" ]; then target=$((now + 480)); else target=$start; fi
+          max=$((now + 19800))
+          [ "$target" -gt "$max" ] && target=$max
           echo "$(( (target - now) / 60 )) dakika sonra sıradaki çalışma başlatılacak"
           sleep $((target - now))
           gh workflow run fiyat.yml --ref master
